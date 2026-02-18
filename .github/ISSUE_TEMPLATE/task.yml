@@ -1,0 +1,50 @@
+name: Task
+description: General work item (prototyping, chore, docs, etc.)
+title: "[Task]: "
+labels: []
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What needs to be done?
+      placeholder: Describe the task.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - Firmware
+        - PCB / hardware
+        - Case / enclosure
+        - Docs
+        - Tooling / CI
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Done when
+      placeholder: How do you know this is complete? Metrics, pass/fail criteria, etc.
+    validations:
+      required: false
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      placeholder: "Depends on #X, blocked by parts delivery, etc."
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Notes, risks, references.
+    validations:
+      required: false

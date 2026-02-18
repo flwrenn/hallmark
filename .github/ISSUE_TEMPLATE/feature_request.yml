@@ -1,0 +1,42 @@
+name: Feature Request
+description: Propose a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What and why?
+      placeholder: Describe the feature and the problem it solves.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - Firmware
+        - PCB / hardware
+        - Case / enclosure
+        - Docs
+        - Tooling / CI
+    validations:
+      required: true
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Possible approach
+      placeholder: How might this be implemented? Optional.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: References, mockups, datasheets, etc.
+    validations:
+      required: false
