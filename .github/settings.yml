@@ -3,7 +3,7 @@
 
 repository:
   name: hallmark
-  description: Custom wirelessHall Effect 36-key split keyboard
+  description: Custom wireless Hall Effect 36-key split keyboard
   homepage: ""
   topics: keyboard, hall-effect, nrf52840, zephyr, split-keyboard
   private: false
