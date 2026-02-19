@@ -1,0 +1,80 @@
+/*
+ * Common devicetree for SuperMini nRF52840.
+ * Pin-compatible with Nice!Nano v2.
+ *
+ * Header pinout (Pro Micro compatible):
+ *   D0  = P0.06 (TX)     D1  = P0.08 (RX)
+ *   D2  = P0.17           D3  = P0.20
+ *   D4  = P0.22           D5  = P0.24
+ *   D6  = P1.00           D7  = P0.11
+ *   D8  = P1.04           D9  = P1.06
+ *   D10 = P0.09           D16 = P0.10
+ *   D14 = P1.11           D15 = P1.13
+ *   D18 = P0.02 (AIN0)    D19 = P0.29 (AIN5)
+ *   D20 = P0.31 (AIN7)    D21 = P0.03 (AIN1)
+ *
+ * Back side pads:
+ *   P0.04 (AIN2)          P0.26
+ *
+ * P0.13 = VCC LDO enable (GPIO_ACTIVE_HIGH on v2/SuperMini)
+ */
+
+/dts-v1/;
+#include <nordic/nrf52840_qiaa.dtsi>
+#include "supermini_nrf52840-pinctrl.dtsi"
+
+/ {
+	chosen {
+		zephyr,ieee802154 = &ieee802154;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		/* Red LED (active low) -- labeled as "blue" on Nice!Nano, colors are swapped on SuperMini */
+		led0: led_0 {
+			gpios = <&gpio0 15 GPIO_ACTIVE_LOW>;
+			label = "User LED";
+		};
+	};
+
+	/* VCC rail control via LDO enable pin */
+	ext_power {
+		compatible = "regulator-fixed";
+		regulator-name = "ext-power";
+		enable-gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+		regulator-boot-on;
+		startup-delay-us = <50000>;
+	};
+
+	aliases {
+		led0 = &led0;
+		watchdog0 = &wdt0;
+	};
+};
+
+/* Use DC/DC regulator for better power efficiency */
+&reg1 {
+	regulator-initial-mode = <NRF5X_REG_MODE_DCDC>;
+};
+
+&adc { status = "okay"; };
+&uicr { gpio-as-nreset; };
+&gpiote { status = "okay"; };
+&gpio0 { status = "okay"; };
+&gpio1 { status = "okay"; };
+
+&uart0 {
+	compatible = "nordic,nrf-uart";
+	current-speed = <115200>;
+	status = "okay";
+	pinctrl-0 = <&uart0_default>;
+	pinctrl-1 = <&uart0_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+&ieee802154 { status = "okay"; };
+
+zephyr_udc0: &usbd {
+	compatible = "nordic,nrf-usbd";
+	status = "okay";
+};

@@ -1,0 +1,8 @@
+if BOARD_SUPERMINI_NRF52840
+
+# Enable USB CDC ACM serial console for the UF2 variant
+if BOARD_SUPERMINI_NRF52840_NRF52840_UF2
+source "boards/common/usb/Kconfig.cdc_acm_serial.defconfig"
+endif
+
+endif # BOARD_SUPERMINI_NRF52840
