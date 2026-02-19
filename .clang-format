@@ -1,0 +1,72 @@
+# Hallmark — K&R style, 4-space indent, Zephyr extras
+---
+BasedOnStyle: LLVM
+
+# Layout
+IndentWidth: 4
+UseTab: Never
+ColumnLimit: 100
+BreakBeforeBraces: Linux
+ContinuationIndentWidth: 8
+IndentCaseLabels: false
+IndentGotoLabels: false
+InsertBraces: true
+InsertNewlineAtEOF: true
+
+# Disable compact forms
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+# Alignment and spacing
+AlignConsecutiveMacros: AcrossComments
+BitFieldColonSpacing: After
+SpaceBeforeParens: ControlStatementsExceptControlMacros
+
+# Zephyr attribute macros
+AttributeMacros:
+  - __aligned
+  - __deprecated
+  - __packed
+  - __printf_like
+  - __syscall
+  - __syscall_always_inline
+  - __subsystem
+
+# Zephyr iteration macros (expand as needed)
+ForEachMacros:
+  - ARRAY_FOR_EACH
+  - ARRAY_FOR_EACH_PTR
+  - FOR_EACH
+  - FOR_EACH_FIXED_ARG
+  - FOR_EACH_IDX
+  - FOR_EACH_IDX_FIXED_ARG
+  - K_SPINLOCK
+  - STRUCT_SECTION_FOREACH
+  - STRUCT_SECTION_FOREACH_ALTERNATE
+  - SYS_SLIST_FOR_EACH_NODE
+  - SYS_SLIST_FOR_EACH_NODE_SAFE
+  - SYS_DLIST_FOR_EACH_NODE
+  - SYS_DLIST_FOR_EACH_NODE_SAFE
+
+IfMacros:
+  - CHECKIF
+
+# Includes — manual ordering, grouped by tier
+SortIncludes: Never
+IncludeCategories:
+  - Regex: '^".*\.h"$'
+    Priority: 0
+  - Regex: '^<zephyr/.*\.h>$'
+    Priority: 1
+  - Regex: '.*'
+    Priority: 2
+
+# Whitespace-sensitive macros
+WhitespaceSensitiveMacros:
+  - COND_CODE_0
+  - COND_CODE_1
+  - STRINGIFY
