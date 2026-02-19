@@ -1,5 +1,8 @@
 # macOS
 .DS_Store
 
+# Build artifacts
+build/
+
 # Project
 tmp/
