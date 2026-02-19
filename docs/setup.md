@@ -52,7 +52,7 @@ For macOS ARM64:
 
 ```sh
 cd ~
-wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.4/zephyr-sdk-0.17.4_macos-aarch64.tar.xz
+curl -LO https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.4/zephyr-sdk-0.17.4_macos-aarch64.tar.xz
 tar xf zephyr-sdk-0.17.4_macos-aarch64.tar.xz
 cd zephyr-sdk-0.17.4
 ./setup.sh
