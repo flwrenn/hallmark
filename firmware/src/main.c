@@ -18,6 +18,7 @@ int main(void)
 	int ret;
 	unsigned int count = 0;
 
+	/* Wait for USB host to enumerate CDC ACM device before logging */
 	k_msleep(1000);
 
 	if (!gpio_is_ready_dt(&led)) {
