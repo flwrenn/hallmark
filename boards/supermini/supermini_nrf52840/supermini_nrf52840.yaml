@@ -1,0 +1,15 @@
+identifier: supermini_nrf52840/nrf52840
+name: SuperMini nRF52840
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+supported:
+  - adc
+  - usbd
+  - ble
+  - watchdog
+  - counter
+  - gpio
+vendor: generic
