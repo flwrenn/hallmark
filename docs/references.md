@@ -7,6 +7,17 @@
 - [Allegro A1304 Datasheet](https://www.allegromicro.com/en/products/sense/linear-and-angular-position/linear-position-sensor-ics/a1304)
 - [CD74HC4051 Datasheet (TI)](https://www.ti.com/product/CD74HC4051)
 
+## Board Definition & Toolchain
+
+- [Zephyr Board Porting Guide (HWMv2)](https://docs.zephyrproject.org/latest/hardware/porting/board_porting.html)
+- [Nice!Nano v2 Documentation](https://nicekeyboards.com/nice-nano/)
+- [Nice!Nano v2 Pinout](https://nicekeyboards.com/docs/nice-nano/pinout-schematic)
+- [Nice!Nano v2 Zephyr Board Definition](https://github.com/zephyrproject-rtos/zephyr/tree/main/boards/nice_keyboards/nice_nano_v2)
+- [Adafruit nRF52 Bootloader](https://github.com/adafruit/Adafruit_nRF52_Bootloader)
+- [Zephyr USB Device Next (new USB stack)](https://docs.zephyrproject.org/latest/connectivity/usb/device_next/usb_device_next.html)
+- [nRF Connect SDK v3.2.1 Release Notes](https://docs.nordicsemi.com/bundle/ncs-3.2.1/page/nrf/releases_and_maturity/releases/release-notes-3.2.1.html)
+- [Zephyr SDK 0.17.4](https://github.com/zephyrproject-rtos/sdk-ng/releases/tag/v0.17.4)
+
 ## SDK & RTOS
 
 - [nRF Connect SDK Documentation](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/)
