@@ -38,6 +38,7 @@ hallmark/
 
 ## Docs
 
+- [Setup](docs/setup.md) -- dev environment setup (NCS, toolchain, build, flash)
 - [Architecture](docs/architecture.md) -- system design, components, block diagram
 - [Phases](docs/phases.md) -- development phases post-prototyping
 - [Firmware](docs/firmware.md) -- technology choices and planned modules
