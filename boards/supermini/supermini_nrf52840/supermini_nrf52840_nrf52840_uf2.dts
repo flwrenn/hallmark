@@ -1,0 +1,14 @@
+/*
+ * SuperMini nRF52840 -- UF2 bootloader variant.
+ * Application offset at 0x26000 to avoid overwriting the Adafruit nRF52 Bootloader.
+ * Console output via USB CDC ACM serial.
+ */
+
+#include "supermini_nrf52840_common.dtsi"
+#include <nordic/nrf52840_partition_uf2_sdv6.dtsi>
+#include <../boards/common/usb/cdc_acm_serial.dtsi>
+
+/ {
+	model = "SuperMini nRF52840 UF2";
+	compatible = "supermini,nrf52840-uf2";
+};

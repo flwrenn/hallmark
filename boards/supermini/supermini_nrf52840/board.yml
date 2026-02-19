@@ -1,0 +1,8 @@
+board:
+  name: supermini_nrf52840
+  full_name: SuperMini nRF52840
+  vendor: generic
+  socs:
+    - name: nrf52840
+      variants:
+        - name: uf2

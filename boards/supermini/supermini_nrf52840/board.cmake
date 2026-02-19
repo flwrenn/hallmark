@@ -1,0 +1,5 @@
+board_runner_args(jlink "--device=nRF52840_xxAA" "--speed=4000")
+if(CONFIG_BUILD_OUTPUT_UF2)
+  include(${ZEPHYR_BASE}/boards/common/uf2.board.cmake)
+endif()
+include(${ZEPHYR_BASE}/boards/common/jlink.board.cmake)
