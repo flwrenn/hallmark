@@ -1,0 +1,4 @@
+add_executable(test_rapid_trigger test_rapid_trigger.c)
+target_link_libraries(test_rapid_trigger PRIVATE unity hallmark_algorithms)
+
+add_test(NAME rapid_trigger COMMAND test_rapid_trigger)
