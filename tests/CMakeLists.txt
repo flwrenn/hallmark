@@ -46,3 +46,4 @@ enable_testing()
 
 add_subdirectory(smoke)
 add_subdirectory(rapid_trigger)
+add_subdirectory(home_row_mod)
