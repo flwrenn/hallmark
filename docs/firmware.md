@@ -10,9 +10,19 @@
 | PPI (Programmable Peripheral Interconnect) | nRF52840 hardware automation chains timer -> GPIO (MUX select) -> SAADC -> DMA -> RAM. CPU sleeps during the entire 18-key scan. |
 | C11 | Required by Zephyr. |
 
-## Planned Modules
+## Modules
 
 "Central" = whichever device is connected to the PC and runs the logic. In Phase 1 that's one of the keyboard halves (USB to PC). In Phase 3 it's the XIAO dongle. The module code doesn't change -- it just runs on a different device.
+
+### Implemented (algorithm cores, pure C, no RTOS deps)
+
+| Module | Runs On | Purpose | Source |
+|--------|---------|---------|--------|
+| Rapid Trigger | Central | Per-key actuation via direction reversal FSM | `rapid_trigger.c` |
+| Home Row Mod | Central | Depth + time hybrid tap/hold decision | `home_row_mod.c` |
+| SOCD | Central | Last-input-wins opposing key resolution | `socd.c` |
+
+### Planned
 
 | Module | Runs On | Purpose |
 |--------|---------|---------|
