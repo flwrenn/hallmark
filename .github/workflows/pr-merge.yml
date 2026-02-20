@@ -21,7 +21,7 @@ jobs:
             const pattern = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
             const matches = [...body.matchAll(pattern)];
             for (const match of matches) {
-              const issue_number = parseInt(match[1]);
+              const issue_number = parseInt(match[1], 10);
               try {
                 await github.rest.issues.update({
                   owner: context.repo.owner,
