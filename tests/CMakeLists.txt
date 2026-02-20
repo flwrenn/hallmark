@@ -42,3 +42,4 @@ endif()
 enable_testing()
 
 add_subdirectory(smoke)
+add_subdirectory(rapid_trigger)
