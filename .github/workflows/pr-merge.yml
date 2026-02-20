@@ -18,11 +18,20 @@ jobs:
         with:
           script: |
             const body = context.payload.pull_request.body || '';
-            const pattern = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
+            const pattern = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
             const matches = [...body.matchAll(pattern)];
             for (const match of matches) {
               const issue_number = parseInt(match[1], 10);
               try {
+                const { data: issue } = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number
+                });
+                if (issue.pull_request) {
+                  console.log(`Skipping #${issue_number} (pull request, not issue)`);
+                  continue;
+                }
                 await github.rest.issues.update({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -40,7 +49,13 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const branch = context.payload.pull_request.head.ref;
+            const head = context.payload.pull_request.head;
+            const baseRepo = context.payload.pull_request.base.repo.full_name;
+            if (head.repo.full_name !== baseRepo) {
+              console.log(`Skipping deletion: ${head.ref} (fork: ${head.repo.full_name})`);
+              return;
+            }
+            const branch = head.ref;
             const prefixes = ['feat/', 'fix/', 'refactor/', 'docs/', 'chore/', 'test/', 'hotfix/'];
             if (!prefixes.some(p => branch.startsWith(p))) {
               console.log(`Skipping deletion: ${branch} (no matching prefix)`);
