@@ -15,8 +15,7 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED_UNITY ON)
 FetchContent_Declare(
     unity
     GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
-    GIT_TAG        v2.6.1
-    GIT_SHALLOW    TRUE
+    GIT_TAG        cbcd08fa7de711053a3deec6339ee89cad5d2697 # v2.6.1
 )
 FetchContent_MakeAvailable(unity)
 
