@@ -29,6 +29,7 @@ set(FIRMWARE_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../firmware/include)
 set(ALGO_SOURCES
     ${FIRMWARE_SRC_DIR}/rapid_trigger.c
     ${FIRMWARE_SRC_DIR}/home_row_mod.c
+    ${FIRMWARE_SRC_DIR}/socd.c
 )
 
 if(ALGO_SOURCES)
