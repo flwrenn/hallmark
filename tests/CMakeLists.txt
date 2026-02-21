@@ -25,7 +25,9 @@ FetchContent_MakeAvailable(unity)
 set(FIRMWARE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../firmware/src)
 
 # Algorithm sources -- list new modules here explicitly
-set(ALGO_SOURCES)
+set(ALGO_SOURCES
+    ${FIRMWARE_SRC_DIR}/rapid_trigger.c
+)
 
 if(ALGO_SOURCES)
     add_library(hallmark_algorithms STATIC ${ALGO_SOURCES})
