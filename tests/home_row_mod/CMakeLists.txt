@@ -1,4 +1,4 @@
 add_executable(test_home_row_mod test_home_row_mod.c)
 target_link_libraries(test_home_row_mod PRIVATE unity hallmark_algorithms)
 
-add_test(NAME home_row_mod COMMAND test_home_row_mod)
+add_test(NAME home_row_mod COMMAND $<TARGET_FILE:test_home_row_mod>)
