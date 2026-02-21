@@ -28,6 +28,7 @@ set(FIRMWARE_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../firmware/include)
 # Algorithm sources -- list new modules here explicitly
 set(ALGO_SOURCES
     ${FIRMWARE_SRC_DIR}/rapid_trigger.c
+    ${FIRMWARE_SRC_DIR}/home_row_mod.c
 )
 
 if(ALGO_SOURCES)
