@@ -7,7 +7,11 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # -------------------------------------------------------------------
 # Unity test framework (embedded C standard)
 # -------------------------------------------------------------------
+# After the initial clone, skip network access on reconfigure.
+# For fully offline or vendored builds, configure with:
+#   -DFETCHCONTENT_SOURCE_DIR_UNITY=/path/to/unity
 include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED_UNITY ON)
 FetchContent_Declare(
     unity
     GIT_REPOSITORY https://github.com/ThrowTheSwitch/Unity.git
