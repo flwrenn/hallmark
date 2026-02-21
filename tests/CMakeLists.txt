@@ -21,9 +21,8 @@ FetchContent_MakeAvailable(unity)
 # -------------------------------------------------------------------
 set(FIRMWARE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../firmware/src)
 
-# Collect algorithm sources (exclude main.c which is the Zephyr app)
-file(GLOB ALGO_SOURCES ${FIRMWARE_SRC_DIR}/*.c)
-list(FILTER ALGO_SOURCES EXCLUDE REGEX "main\\.c$")
+# Algorithm sources -- list new modules here explicitly
+set(ALGO_SOURCES)
 
 if(ALGO_SOURCES)
     add_library(hallmark_algorithms STATIC ${ALGO_SOURCES})
