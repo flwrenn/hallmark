@@ -8,7 +8,7 @@
  *   IDLE  ──press past actuation──▸  ACTIVE
  *   ACTIVE ──reversal up past sensitivity──▸  RELEASING
  *   RELEASING ──reversal down past sensitivity──▸  ACTIVE
- *   ACTIVE / RELEASING ──returns above release point──▸  IDLE
+ *   ACTIVE / RELEASING ──passes release point──▸  IDLE
  */
 
 #ifndef RAPID_TRIGGER_H
