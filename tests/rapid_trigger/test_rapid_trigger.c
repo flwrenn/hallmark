@@ -55,21 +55,6 @@ static void init_key(uint16_t sensitivity)
     rt_init(&key, &cfg);
 }
 
-/* Feed an array of ADC samples, count press/release events. */
-static void feed_samples(const uint16_t *samples, int count, int *presses, int *releases)
-{
-    *presses = 0;
-    *releases = 0;
-    for (int i = 0; i < count; i++) {
-        enum rt_event ev = rt_update(&key, samples[i]);
-        if (ev == RT_EVENT_PRESS) {
-            (*presses)++;
-        } else if (ev == RT_EVENT_RELEASE) {
-            (*releases)++;
-        }
-    }
-}
-
 void setUp(void)
 {
 }
