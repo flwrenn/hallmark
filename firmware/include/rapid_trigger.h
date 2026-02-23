@@ -14,7 +14,6 @@
 #ifndef RAPID_TRIGGER_H
 #define RAPID_TRIGGER_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 /* ---------------------------------------------------------------------
