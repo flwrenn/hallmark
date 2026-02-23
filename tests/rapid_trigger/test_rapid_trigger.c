@@ -76,7 +76,6 @@ void test_no_event_below_actuation(void)
 {
     init_key(SENS_02MM);
 
-    /* Stay below actuation point */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, REST_ADC));
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, REST_ADC + 50));
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, ACTUATION_ADC - 1));
@@ -107,25 +106,20 @@ void test_full_press_release(void)
 {
     init_key(SENS_02MM);
 
-    /* Press down past actuation */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_PRESS, rt_update(&key, ACTUATION_ADC));
     TEST_ASSERT_EQUAL_INT(RT_ACTIVE, key.state);
 
-    /* Continue pressing deeper -- no new event */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, 500));
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, 700));
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, BOTTOM_ADC));
     TEST_ASSERT_EQUAL_INT(RT_ACTIVE, key.state);
 
-    /* Start releasing -- small movement, not enough */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, BOTTOM_ADC - 10));
     TEST_ASSERT_EQUAL_INT(RT_ACTIVE, key.state);
 
-    /* Release past sensitivity threshold from peak */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_RELEASE, rt_update(&key, BOTTOM_ADC - SENS_02MM));
     TEST_ASSERT_EQUAL_INT(RT_RELEASING, key.state);
 
-    /* Continue up past release point -> IDLE */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, RELEASE_ADC));
     TEST_ASSERT_EQUAL_INT(RT_IDLE, key.state);
 }
@@ -134,10 +128,8 @@ void test_release_to_idle_from_active(void)
 {
     init_key(SENS_02MM);
 
-    /* Press */
     rt_update(&key, ACTUATION_ADC);
 
-    /* Jump straight back to rest (fast tap) */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_RELEASE, rt_update(&key, RELEASE_ADC));
     TEST_ASSERT_EQUAL_INT(RT_IDLE, key.state);
 }
@@ -150,19 +142,15 @@ void test_repress_from_releasing(void)
 {
     init_key(SENS_02MM);
 
-    /* Press deep */
     rt_update(&key, ACTUATION_ADC);
     rt_update(&key, 700);
 
-    /* Release past sensitivity -> RELEASING */
     rt_update(&key, 700 - SENS_02MM);
     TEST_ASSERT_EQUAL_INT(RT_RELEASING, key.state);
 
-    /* Small downward movement -- not enough to re-press */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, 700 - SENS_02MM + 10));
     TEST_ASSERT_EQUAL_INT(RT_RELEASING, key.state);
 
-    /* Push back down past sensitivity from trough -> re-ACTIVE */
     uint16_t trough = 700 - SENS_02MM;
     TEST_ASSERT_EQUAL_INT(RT_EVENT_PRESS, rt_update(&key, trough + SENS_02MM));
     TEST_ASSERT_EQUAL_INT(RT_ACTIVE, key.state);
@@ -172,23 +160,18 @@ void test_rapid_press_release_cycle(void)
 {
     init_key(SENS_02MM);
 
-    /* Initial press */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_PRESS, rt_update(&key, ACTUATION_ADC));
 
-    /* Push to 600 */
     rt_update(&key, 500);
     rt_update(&key, 600);
 
-    /* 5 rapid trigger cycles around 600 */
     int presses = 0;
     int releases = 0;
     for (int i = 0; i < 5; i++) {
-        /* Release */
         enum rt_event ev = rt_update(&key, 600 - SENS_02MM);
         if (ev == RT_EVENT_RELEASE) {
             releases++;
         }
-        /* Re-press */
         ev = rt_update(&key, 600);
         if (ev == RT_EVENT_PRESS) {
             presses++;
@@ -207,15 +190,12 @@ void test_sensitivity_0_1mm(void)
 {
     init_key(SENS_01MM);
 
-    /* Press to 700, then tiny reversal of exactly sensitivity */
     rt_update(&key, ACTUATION_ADC);
     rt_update(&key, 700);
 
-    /* Just under threshold -- no release */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, 700 - SENS_01MM + 1));
     TEST_ASSERT_EQUAL_INT(RT_ACTIVE, key.state);
 
-    /* At threshold -- release */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_RELEASE, rt_update(&key, 700 - SENS_01MM));
     TEST_ASSERT_EQUAL_INT(RT_RELEASING, key.state);
 }
@@ -227,11 +207,9 @@ void test_sensitivity_0_5mm(void)
     rt_update(&key, ACTUATION_ADC);
     rt_update(&key, 700);
 
-    /* Reversal of 0.2mm -- too small for 0.5mm sensitivity */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, 700 - SENS_02MM));
     TEST_ASSERT_EQUAL_INT(RT_ACTIVE, key.state);
 
-    /* Reversal of 0.5mm -- triggers */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_RELEASE, rt_update(&key, 700 - SENS_05MM));
     TEST_ASSERT_EQUAL_INT(RT_RELEASING, key.state);
 }
@@ -244,13 +222,8 @@ void test_no_false_triggers_on_static_input(void)
 {
     init_key(SENS_02MM);
 
-    /*
-     * 1000 samples at rest with +-4 count noise (realistic sigma ~3).
-     * Must produce zero events (S4 pass criterion: 0/1000).
-     */
     int presses = 0, releases = 0;
     for (int i = 0; i < 1000; i++) {
-        /* Deterministic noise pattern: -4, -2, 0, +2, +4, ... */
         int noise = ((i % 5) - 2) * 2;
         uint16_t sample = (uint16_t)(REST_ADC + noise);
         enum rt_event ev = rt_update(&key, sample);
@@ -270,11 +243,9 @@ void test_no_false_triggers_when_held(void)
 {
     init_key(SENS_02MM);
 
-    /* Press to mid-travel */
     rt_update(&key, ACTUATION_ADC);
     rt_update(&key, 550);
 
-    /* Hold with noise -- no spurious release */
     int releases = 0;
     for (int i = 0; i < 500; i++) {
         int noise = ((i % 5) - 2) * 2;
@@ -297,7 +268,6 @@ void test_slow_press_to_bottom(void)
     init_key(SENS_02MM);
     int presses = 0, releases = 0;
 
-    /* Ramp from rest to bottom-out in 1-count increments */
     for (uint16_t adc = REST_ADC; adc <= BOTTOM_ADC; adc++) {
         enum rt_event ev = rt_update(&key, adc);
         if (ev == RT_EVENT_PRESS) {
@@ -308,7 +278,6 @@ void test_slow_press_to_bottom(void)
         }
     }
 
-    /* Exactly one press, no releases */
     TEST_ASSERT_EQUAL_INT(1, presses);
     TEST_ASSERT_EQUAL_INT(0, releases);
     TEST_ASSERT_EQUAL_INT(RT_ACTIVE, key.state);
@@ -318,11 +287,9 @@ void test_half_press_and_hold(void)
 {
     init_key(SENS_02MM);
 
-    /* Press halfway */
     rt_update(&key, ACTUATION_ADC);
     rt_update(&key, 550);
 
-    /* Hold for many cycles */
     for (int i = 0; i < 200; i++) {
         TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, 550));
     }
@@ -334,21 +301,15 @@ void test_rapid_double_tap(void)
 {
     init_key(SENS_02MM);
 
-    /*
-     * 50 full tap cycles: press to 500, release to rest.
-     * Each should produce exactly 1 press + 1 release.
-     */
     int total_presses = 0, total_releases = 0;
 
     for (int tap = 0; tap < 50; tap++) {
-        /* Down stroke */
         for (uint16_t adc = REST_ADC; adc <= 500; adc += 20) {
             enum rt_event ev = rt_update(&key, adc);
             if (ev == RT_EVENT_PRESS) {
                 total_presses++;
             }
         }
-        /* Up stroke back to rest */
         for (int adc = 500; adc >= REST_ADC; adc -= 20) {
             enum rt_event ev = rt_update(&key, (uint16_t)adc);
             if (ev == RT_EVENT_RELEASE) {
@@ -366,20 +327,16 @@ void test_partial_release_repress(void)
 {
     init_key(SENS_02MM);
 
-    /* Press deep */
     rt_update(&key, ACTUATION_ADC);
     rt_update(&key, 800);
 
-    /* Partial release -- triggers RT release */
     rt_update(&key, 800 - SENS_02MM);
     TEST_ASSERT_EQUAL_INT(RT_RELEASING, key.state);
 
-    /* Re-press without returning to rest -- triggers RT press */
     uint16_t trough = 800 - SENS_02MM;
     TEST_ASSERT_EQUAL_INT(RT_EVENT_PRESS, rt_update(&key, trough + SENS_02MM));
     TEST_ASSERT_EQUAL_INT(RT_ACTIVE, key.state);
 
-    /* Continue pressing deeper */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, BOTTOM_ADC));
     TEST_ASSERT_EQUAL_INT(RT_ACTIVE, key.state);
 }
@@ -388,13 +345,11 @@ void test_releasing_to_idle_on_rest(void)
 {
     init_key(SENS_02MM);
 
-    /* Press, then release past sensitivity to enter RELEASING */
     rt_update(&key, ACTUATION_ADC);
     rt_update(&key, 600);
     rt_update(&key, 600 - SENS_02MM);
     TEST_ASSERT_EQUAL_INT(RT_RELEASING, key.state);
 
-    /* Return to rest -> should go IDLE, no extra events */
     TEST_ASSERT_EQUAL_INT(RT_EVENT_NONE, rt_update(&key, RELEASE_ADC));
     TEST_ASSERT_EQUAL_INT(RT_IDLE, key.state);
 }
@@ -406,14 +361,12 @@ void test_releasing_to_idle_on_rest(void)
 void test_mm_to_counts(void)
 {
     uint16_t c = rt_mm_to_counts(0.2f, COUNTS_PER_MM);
-    /* 0.2 * ~206 = ~41 */
     TEST_ASSERT_INT_WITHIN(2, 41, c);
 }
 
 void test_counts_to_mm(void)
 {
     float mm = rt_counts_to_mm(206, COUNTS_PER_MM);
-    /* 206 / ~206 = ~1.0mm */
     TEST_ASSERT_FLOAT_WITHIN(0.05f, 1.0f, mm);
 }
 
@@ -425,36 +378,29 @@ int main(void)
 {
     UNITY_BEGIN();
 
-    /* Basic transitions */
     RUN_TEST(test_starts_idle);
     RUN_TEST(test_no_event_below_actuation);
     RUN_TEST(test_press_at_actuation);
     RUN_TEST(test_press_past_actuation);
 
-    /* Full cycles */
     RUN_TEST(test_full_press_release);
     RUN_TEST(test_release_to_idle_from_active);
 
-    /* Rapid trigger re-actuation */
     RUN_TEST(test_repress_from_releasing);
     RUN_TEST(test_rapid_press_release_cycle);
 
-    /* Sensitivity levels */
     RUN_TEST(test_sensitivity_0_1mm);
     RUN_TEST(test_sensitivity_0_5mm);
 
-    /* Noise rejection */
     RUN_TEST(test_no_false_triggers_on_static_input);
     RUN_TEST(test_no_false_triggers_when_held);
 
-    /* Edge cases */
     RUN_TEST(test_slow_press_to_bottom);
     RUN_TEST(test_half_press_and_hold);
     RUN_TEST(test_rapid_double_tap);
     RUN_TEST(test_partial_release_repress);
     RUN_TEST(test_releasing_to_idle_on_rest);
 
-    /* Helpers */
     RUN_TEST(test_mm_to_counts);
     RUN_TEST(test_counts_to_mm);
 
