@@ -23,6 +23,7 @@ FetchContent_MakeAvailable(unity)
 # Shared algorithm library -- pure C, no RTOS dependencies
 # -------------------------------------------------------------------
 set(FIRMWARE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../firmware/src)
+set(FIRMWARE_INC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../firmware/include)
 
 # Algorithm sources -- list new modules here explicitly
 set(ALGO_SOURCES
@@ -31,11 +32,11 @@ set(ALGO_SOURCES
 
 if(ALGO_SOURCES)
     add_library(hallmark_algorithms STATIC ${ALGO_SOURCES})
-    target_include_directories(hallmark_algorithms PUBLIC ${FIRMWARE_SRC_DIR})
+    target_include_directories(hallmark_algorithms PUBLIC ${FIRMWARE_INC_DIR})
 else()
     # No algorithm sources yet -- create an interface-only target
     add_library(hallmark_algorithms INTERFACE)
-    target_include_directories(hallmark_algorithms INTERFACE ${FIRMWARE_SRC_DIR})
+    target_include_directories(hallmark_algorithms INTERFACE ${FIRMWARE_INC_DIR})
 endif()
 
 # -------------------------------------------------------------------
