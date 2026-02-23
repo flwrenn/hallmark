@@ -1,0 +1,57 @@
+name: PR status
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  set-pr-status:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set PR to PR Open
+        uses: actions/github-script@v7
+        env:
+          # Hallmark project (users/flwrenn/projects/12)
+          PROJECT_ID: PVT_kwHOBh2HNc4BPjfG
+          # "Status" single-select field
+          STATUS_FIELD_ID: PVTSSF_lAHOBh2HNc4BPjfGzg97gkw
+          # "PR Open" option
+          PR_OPEN_OPTION_ID: df73e18b
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const projectId = process.env.PROJECT_ID;
+            const fieldId = process.env.STATUS_FIELD_ID;
+            const prOpenOptionId = process.env.PR_OPEN_OPTION_ID;
+
+            try {
+              // Add PR to project (idempotent — returns existing item if
+              // the built-in Auto-add workflow already added it)
+              const addResult = await github.graphql(`
+                mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2ItemById(input: {
+                    projectId: $projectId
+                    contentId: $contentId
+                  }) { item { id } }
+                }
+              `, { projectId, contentId: pr.node_id });
+
+              const prItemId = addResult.addProjectV2ItemById.item.id;
+
+              await github.graphql(`
+                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: { singleSelectOptionId: $optionId }
+                  }) { projectV2Item { id } }
+                }
+              `, { projectId, itemId: prItemId, fieldId, optionId: prOpenOptionId });
+
+              console.log(`PR #${pr.number} → PR Open`);
+            } catch (error) {
+              core.warning(`Failed to set project status: ${error.message}`);
+            }
