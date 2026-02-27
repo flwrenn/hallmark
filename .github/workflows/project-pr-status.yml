@@ -26,32 +26,51 @@ jobs:
             const fieldId = process.env.STATUS_FIELD_ID;
             const prOpenOptionId = process.env.PR_OPEN_OPTION_ID;
 
-            try {
-              // Add PR to project (idempotent — returns existing item if
-              // the built-in Auto-add workflow already added it)
-              const addResult = await github.graphql(`
-                mutation($projectId: ID!, $contentId: ID!) {
-                  addProjectV2ItemById(input: {
-                    projectId: $projectId
-                    contentId: $contentId
-                  }) { item { id } }
+            async function findProjectItem(nodeId, attempt = 1) {
+              const result = await github.graphql(`
+                query($nodeId: ID!) {
+                  node(id: $nodeId) {
+                    ... on PullRequest {
+                      projectItems(first: 10) {
+                        nodes { id project { id } }
+                      }
+                    }
+                  }
                 }
-              `, { projectId, contentId: pr.node_id });
+              `, { nodeId });
 
-              const prItemId = addResult.addProjectV2ItemById.item.id;
+              const item = result.node.projectItems.nodes
+                .find(i => i.project.id === projectId);
 
-              await github.graphql(`
-                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                  updateProjectV2ItemFieldValue(input: {
-                    projectId: $projectId
-                    itemId: $itemId
-                    fieldId: $fieldId
-                    value: { singleSelectOptionId: $optionId }
-                  }) { projectV2Item { id } }
-                }
-              `, { projectId, itemId: prItemId, fieldId, optionId: prOpenOptionId });
+              if (item) {
+                return item.id;
+              }
 
-              console.log(`PR #${pr.number} → PR Open`);
-            } catch (error) {
-              core.warning(`Failed to set project status: ${error.message}`);
+              if (attempt < 2) {
+                console.log('PR not in project yet, retrying in 5s…');
+                await new Promise(r => setTimeout(r, 5000));
+                return findProjectItem(nodeId, attempt + 1);
+              }
+
+              return null;
             }
+
+            const prItemId = await findProjectItem(pr.node_id);
+
+            if (!prItemId) {
+              core.setFailed('PR not found in project after retry');
+              return;
+            }
+
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId
+                  itemId: $itemId
+                  fieldId: $fieldId
+                  value: { singleSelectOptionId: $optionId }
+                }) { projectV2Item { id } }
+              }
+            `, { projectId, itemId: prItemId, fieldId, optionId: prOpenOptionId });
+
+            console.log(`PR #${pr.number} → PR Open`);
