@@ -18,17 +18,25 @@
  * ------------------------------------------------------------------ */
 
 /**
+ * Which key in an opposing pair was pressed most recently.
+ */
+enum socd_last {
+    SOCD_LAST_NONE = 0,
+    SOCD_LAST_A = 1,
+    SOCD_LAST_B = 2,
+};
+
+/**
  * State for a single pair of opposing keys (e.g. left/right or up/down).
  *
  * @a_active     Whether key A is currently pressed.
  * @b_active     Whether key B is currently pressed.
- * @last_pressed Which key was pressed most recently (0 = neither,
- *               1 = A, 2 = B).
+ * @last_pressed Which key was pressed most recently.
  */
 struct socd_pair {
     bool a_active;
     bool b_active;
-    uint8_t last_pressed; /* 0 = none, 1 = A, 2 = B */
+    enum socd_last last_pressed;
 };
 
 /**
