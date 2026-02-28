@@ -280,7 +280,7 @@ void test_no_false_holds_on_fast_typing(void)
     int false_holds = 0;
 
     for (int i = 0; i < 500; i++) {
-        uint32_t t = (uint32_t)(i * 80); /* ~75 WPM keystroke interval */
+        uint32_t t = (uint32_t)(i * 80); /* ~150 WPM keystroke interval */
         hrm_press(&key, t);
 
         /* Shallow press at t+10, release at t+40 */
