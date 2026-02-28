@@ -44,7 +44,9 @@ struct hrm_config {
 };
 
 /**
- * Per-key runtime state.  Initialise with hrm_press() on key-down.
+ * Per-key runtime state.  Call hrm_init() once at startup to
+ * zero-initialise; hrm_press() resets the decision state on each
+ * key-down.
  */
 struct hrm_key_state {
     enum hrm_action action;
