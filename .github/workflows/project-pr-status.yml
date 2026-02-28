@@ -42,7 +42,7 @@ jobs:
                 }
               `, { nodeId });
 
-              const nodes = result.node.projectItems.nodes;
+              const nodes = result.node?.projectItems?.nodes ?? [];
               const item = nodes.find(i => i.project.id === projectId);
 
               if (item) {
