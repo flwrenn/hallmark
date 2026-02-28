@@ -58,6 +58,15 @@ void test_a_press_release(void)
     TEST_ASSERT_FALSE(r.b_output);
 }
 
+void test_b_press_release(void)
+{
+    socd_press_b(&pair);
+    socd_release_b(&pair);
+    struct socd_result r = socd_resolve(&pair);
+    TEST_ASSERT_FALSE(r.a_output);
+    TEST_ASSERT_FALSE(r.b_output);
+}
+
 /* --------------------------------------------------------------------- */
 /* Tests: simultaneous press -- last input wins                          */
 /* --------------------------------------------------------------------- */
@@ -193,6 +202,7 @@ int main(void)
     RUN_TEST(test_only_a_pressed);
     RUN_TEST(test_only_b_pressed);
     RUN_TEST(test_a_press_release);
+    RUN_TEST(test_b_press_release);
 
     /* Simultaneous -- last input wins */
     RUN_TEST(test_a_then_b_outputs_b);
