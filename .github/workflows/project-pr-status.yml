@@ -30,17 +30,23 @@ jobs:
             const BASE_DELAY_MS = 3000;
 
             async function findProjectItem(nodeId, attempt = 1) {
-              const result = await github.graphql(`
-                query($nodeId: ID!) {
-                  node(id: $nodeId) {
-                    ... on PullRequest {
-                      projectItems(first: 10) {
-                        nodes { id project { id } }
+              let result;
+              try {
+                result = await github.graphql(`
+                  query($nodeId: ID!) {
+                    node(id: $nodeId) {
+                      ... on PullRequest {
+                        projectItems(first: 10) {
+                          nodes { id project { id } }
+                        }
                       }
                     }
                   }
-                }
-              `, { nodeId });
+                `, { nodeId });
+              } catch (error) {
+                console.log(`GraphQL query failed (attempt ${attempt}/${MAX_ATTEMPTS}): ${error.message}`);
+                return { itemId: null, projectItems: [], error: error.message };
+              }
 
               const nodes = result.node?.projectItems?.nodes ?? [];
               const item = nodes.find(i => i.project.id === projectId);
@@ -59,7 +65,7 @@ jobs:
               return { itemId: null, projectItems: nodes };
             }
 
-            const { itemId: prItemId, projectItems } = await findProjectItem(pr.node_id);
+            const { itemId: prItemId, projectItems, error } = await findProjectItem(pr.node_id);
 
             if (!prItemId) {
               const foundIds = projectItems.map(i => i.project.id);
@@ -67,20 +73,26 @@ jobs:
                 `PR #${pr.number} not found in project ${projectId} after ${MAX_ATTEMPTS} attempts. ` +
                 `Found ${projectItems.length} project item(s)` +
                 (foundIds.length ? ` in project(s): ${foundIds.join(', ')}` : '') +
-                '. Verify project automation and token permissions.'
+                '. Verify project automation and token permissions.' +
+                (error ? ` Error: ${error}` : '')
               );
               return;
             }
 
-            await github.graphql(`
-              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                updateProjectV2ItemFieldValue(input: {
-                  projectId: $projectId
-                  itemId: $itemId
-                  fieldId: $fieldId
-                  value: { singleSelectOptionId: $optionId }
-                }) { projectV2Item { id } }
-              }
-            `, { projectId, itemId: prItemId, fieldId, optionId: prOpenOptionId });
+            try {
+              await github.graphql(`
+                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: { singleSelectOptionId: $optionId }
+                  }) { projectV2Item { id } }
+                }
+              `, { projectId, itemId: prItemId, fieldId, optionId: prOpenOptionId });
+            } catch (error) {
+              core.warning(`Failed to set PR #${pr.number} to PR Open: ${error.message}`);
+              return;
+            }
 
             console.log(`PR #${pr.number} → PR Open`);
