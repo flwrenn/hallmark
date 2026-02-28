@@ -29,6 +29,11 @@ jobs:
             const MAX_ATTEMPTS = 5;
             const BASE_DELAY_MS = 3000;
 
+            function isTransient(error) {
+              if (!error.status) return true;
+              return [429, 502, 503, 504].includes(error.status);
+            }
+
             async function findProjectItem(nodeId, attempt = 1) {
               let result;
               try {
@@ -45,11 +50,13 @@ jobs:
                 `, { nodeId });
               } catch (error) {
                 console.log(`GraphQL query failed (attempt ${attempt}/${MAX_ATTEMPTS}): ${error.message}`);
-                return { itemId: null, projectItems: [], error: error.message };
+                if (!isTransient(error)) {
+                  return { itemId: null, projectItems: [], error: error.message, attempts: attempt };
+                }
               }
 
-              const nodes = result.node?.projectItems?.nodes ?? [];
-              const item = nodes.find(i => i.project.id === projectId);
+              const nodes = result?.node?.projectItems?.nodes ?? [];
+              const item = nodes.find(i => i?.project?.id === projectId);
 
               if (item) {
                 return { itemId: item.id, projectItems: nodes };
@@ -62,15 +69,15 @@ jobs:
                 return findProjectItem(nodeId, attempt + 1);
               }
 
-              return { itemId: null, projectItems: nodes };
+              return { itemId: null, projectItems: nodes, attempts: attempt };
             }
 
-            const { itemId: prItemId, projectItems, error } = await findProjectItem(pr.node_id);
+            const { itemId: prItemId, projectItems, error, attempts } = await findProjectItem(pr.node_id);
 
             if (!prItemId) {
-              const foundIds = projectItems.map(i => i.project.id);
+              const foundIds = projectItems.map(i => i?.project?.id).filter(Boolean);
               core.warning(
-                `PR #${pr.number} not found in project ${projectId} after ${MAX_ATTEMPTS} attempts. ` +
+                `PR #${pr.number} not found in project ${projectId} after ${attempts} attempt(s). ` +
                 `Found ${projectItems.length} project item(s)` +
                 (foundIds.length ? ` in project(s): ${foundIds.join(', ')}` : '') +
                 '. Verify project automation and token permissions.' +
