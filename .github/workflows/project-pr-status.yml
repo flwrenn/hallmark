@@ -26,6 +26,9 @@ jobs:
             const fieldId = process.env.STATUS_FIELD_ID;
             const prOpenOptionId = process.env.PR_OPEN_OPTION_ID;
 
+            const MAX_ATTEMPTS = 5;
+            const BASE_DELAY_MS = 3000;
+
             async function findProjectItem(nodeId, attempt = 1) {
               const result = await github.graphql(`
                 query($nodeId: ID!) {
@@ -39,26 +42,33 @@ jobs:
                 }
               `, { nodeId });
 
-              const item = result.node.projectItems.nodes
-                .find(i => i.project.id === projectId);
+              const nodes = result.node.projectItems.nodes;
+              const item = nodes.find(i => i.project.id === projectId);
 
               if (item) {
-                return item.id;
+                return { itemId: item.id, projectItems: nodes };
               }
 
-              if (attempt < 2) {
-                console.log('PR not in project yet, retrying in 5s…');
-                await new Promise(r => setTimeout(r, 5000));
+              if (attempt < MAX_ATTEMPTS) {
+                const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+                console.log(`PR not in project yet (attempt ${attempt}/${MAX_ATTEMPTS}), retrying in ${delay / 1000}s…`);
+                await new Promise(r => setTimeout(r, delay));
                 return findProjectItem(nodeId, attempt + 1);
               }
 
-              return null;
+              return { itemId: null, projectItems: nodes };
             }
 
-            const prItemId = await findProjectItem(pr.node_id);
+            const { itemId: prItemId, projectItems } = await findProjectItem(pr.node_id);
 
             if (!prItemId) {
-              core.setFailed('PR not found in project after retry');
+              const foundIds = projectItems.map(i => i.project.id);
+              core.warning(
+                `PR #${pr.number} not found in project ${projectId} after ${MAX_ATTEMPTS} attempts. ` +
+                `Found ${projectItems.length} project item(s)` +
+                (foundIds.length ? ` in project(s): ${foundIds.join(', ')}` : '') +
+                '. Verify project automation and token permissions.'
+              );
               return;
             }
 
