@@ -18,16 +18,16 @@ brew install dtc
 ## 2. Create Python virtual environment
 
 ```sh
-mkdir -p ~/ncs
-python3 -m venv ~/ncs/.venv
-source ~/ncs/.venv/bin/activate
+mkdir -p ~/.ncs
+python3 -m venv ~/.ncs/.venv
+source ~/.ncs/.venv/bin/activate
 pip install west
 ```
 
 ## 3. Initialize nRF Connect SDK v3.2.1
 
 ```sh
-cd ~/ncs
+cd ~/.ncs
 west init -m https://github.com/nrfconnect/sdk-nrf --mr v3.2.1
 west update
 ```
@@ -37,11 +37,11 @@ This clones ~51 repositories. Takes 10-20 minutes depending on network speed.
 ## 4. Install Python dependencies and register Zephyr
 
 ```sh
-source ~/ncs/.venv/bin/activate
+source ~/.ncs/.venv/bin/activate
 west zephyr-export
-pip install -r ~/ncs/zephyr/scripts/requirements.txt
-pip install -r ~/ncs/nrf/scripts/requirements.txt
-pip install -r ~/ncs/bootloader/mcuboot/scripts/requirements.txt
+pip install -r ~/.ncs/zephyr/scripts/requirements.txt
+pip install -r ~/.ncs/nrf/scripts/requirements.txt
+pip install -r ~/.ncs/bootloader/mcuboot/scripts/requirements.txt
 ```
 
 ## 5. Install Zephyr SDK 0.17.4
@@ -54,14 +54,15 @@ For macOS ARM64:
 cd ~
 curl -LO https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.4/zephyr-sdk-0.17.4_macos-aarch64.tar.xz
 tar xf zephyr-sdk-0.17.4_macos-aarch64.tar.xz
-cd zephyr-sdk-0.17.4
+mv zephyr-sdk-0.17.4 .zephyr-sdk-0.17.4
+cd .zephyr-sdk-0.17.4
 ./setup.sh
 ```
 
 Verify the ARM toolchain:
 
 ```sh
-~/zephyr-sdk-0.17.4/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc --version
+~/.zephyr-sdk-0.17.4/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc --version
 # arm-zephyr-eabi-gcc (Zephyr SDK 0.17.4) 12.2.0
 ```
 
@@ -70,8 +71,8 @@ Verify the ARM toolchain:
 From the hallmark repo root:
 
 ```sh
-source ~/ncs/.venv/bin/activate
-export ZEPHYR_BASE=~/ncs/zephyr
+source ~/.ncs/.venv/bin/activate
+export ZEPHYR_BASE=~/.ncs/zephyr
 
 west build -b supermini_nrf52840/nrf52840/uf2 firmware/ -- -DBOARD_ROOT=$(pwd)
 ```
