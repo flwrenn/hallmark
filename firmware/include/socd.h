@@ -11,7 +11,6 @@
 #define SOCD_H
 
 #include <stdbool.h>
-#include <stdint.h>
 
 /* ---------------------------------------------------------------------
  * Types
