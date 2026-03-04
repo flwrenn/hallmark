@@ -20,7 +20,7 @@
 | Rapid Trigger | Central | Per-key actuation detection with direction reversal |
 | Home Row Mod | Central | Depth + time hybrid tap/hold decision |
 | SOCD | Central | Simultaneous opposing key resolution |
-| Keymap | Central | Layers, combos, macros |
+| Keymap | Central | Layers, combos, macros. Config in `firmware/include/keymap_config.h`. |
 | Transport | All | UART (Phase 1) or BLE (Phase 2) between halves |
 | Calibration | Each half | Boot auto-zero, runtime drift compensation |
 | Power Manager | Each half | Adaptive scan rate, deep sleep, battery monitoring |
