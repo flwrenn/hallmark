@@ -9,10 +9,12 @@
 ## Scope
 
 - [ ] Firmware
-- [ ] PCB / hardware
-- [ ] Case / enclosure
-- [ ] Docs
+- [ ] Pcb
+- [ ] Case
+- [ ] Hardware
 - [ ] Tooling / CI
+- [ ] Documentation
+- [ ] Test
 
 ## How to verify
 
