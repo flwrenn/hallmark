@@ -2,7 +2,7 @@
 
 Wireless Hall Effect 36-key split keyboard. Analog sensing, rapid trigger, depth-based home row mods, 1ms LLPM wireless.
 
-**Status:** Prototyping (AliExpress parts delivered; waiting on LCSC shipment — Hall sensors, MUX, caps)
+**Status:** Prototyping (All parts necessary for prototyping delivered; learning how to solder)
 
 ## Specs
 
