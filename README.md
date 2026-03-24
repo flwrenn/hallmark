@@ -2,7 +2,12 @@
 
 Wireless Hall Effect 36-key split keyboard. Analog sensing, rapid trigger, depth-based home row mods, 1ms LLPM wireless.
 
-**Status:** Prototyping (All parts necessary for prototyping delivered; learning how to solder)
+**Status:** Prototyping paused (blocked by faulty soldering iron; cannot melt lead-free solder)
+
+## Current Blockers
+
+- Faulty soldering iron cannot melt lead-free solder, blocking SMD-to-DIP adapter assembly.
+- Prototyping is paused until the iron is repaired/replaced or soldering capability is restored.
 
 ## Specs
 
