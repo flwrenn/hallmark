@@ -19,73 +19,84 @@
  * Dimensions
  * ---------------------------------------------------------------- */
 
-#define KEYMAP_KEYS       36
-#define KEYMAP_LAYERS     9
 #define KEYMAP_COMBOS     22
 #define KEYMAP_SOCD_PAIRS 2
 
 /* -------------------------------------------------------------------
- * Layer indices
+ * Layers
  * ---------------------------------------------------------------- */
 
-#define L_BASE    0
-#define L_SYM     1
-#define L_NAV     2
-#define L_NUM     3
-#define L_GAME    4
-#define L_GAMENUM 5
-#define L_GAMEALT 6
-#define L_NOMOD   7
-#define L_ORIGIN  8
+enum keymap_layer {
+    L_BASE,
+    L_SYM,
+    L_NAV,
+    L_NUM,
+    L_GAME,
+    L_GAMENUM,
+    L_GAMEALT,
+    L_NOMOD,
+    L_ORIGIN,
+    KEYMAP_LAYERS,
+};
 
 /* -------------------------------------------------------------------
  * Key positions
  *
- * Index into layer arrays.  Matches the physical layout in
- * docs/architecture.md.
+ * Index into layer arrays.  Enumerator order is the layer array
+ * order: one row at a time, left half then right half, thumbs last.
  *
  *  L01  L02  L03  L04  L05    R01  R02  R03  R04  R05
  *  L06  L07  L08  L09  L10    R06  R07  R08  R09  R10
  *  L11  L12  L13  L14  L15    R11  R12  R13  R14  R15
  *            LT1  LT2  LT3    RT1  RT2  RT3
+ *
+ * POS_NONE terminates position lists.
  * ---------------------------------------------------------------- */
 
-#define POS_L01 0
-#define POS_L02 1
-#define POS_L03 2
-#define POS_L04 3
-#define POS_L05 4
-#define POS_L06 5
-#define POS_L07 6
-#define POS_L08 7
-#define POS_L09 8
-#define POS_L10 9
-#define POS_L11 10
-#define POS_L12 11
-#define POS_L13 12
-#define POS_L14 13
-#define POS_L15 14
-#define POS_LT1 15
-#define POS_LT2 16
-#define POS_LT3 17
-#define POS_R01 18
-#define POS_R02 19
-#define POS_R03 20
-#define POS_R04 21
-#define POS_R05 22
-#define POS_R06 23
-#define POS_R07 24
-#define POS_R08 25
-#define POS_R09 26
-#define POS_R10 27
-#define POS_R11 28
-#define POS_R12 29
-#define POS_R13 30
-#define POS_R14 31
-#define POS_R15 32
-#define POS_RT1 33
-#define POS_RT2 34
-#define POS_RT3 35
+enum keymap_pos {
+    POS_L01,
+    POS_L02,
+    POS_L03,
+    POS_L04,
+    POS_L05,
+    POS_R01,
+    POS_R02,
+    POS_R03,
+    POS_R04,
+    POS_R05,
+
+    POS_L06,
+    POS_L07,
+    POS_L08,
+    POS_L09,
+    POS_L10,
+    POS_R06,
+    POS_R07,
+    POS_R08,
+    POS_R09,
+    POS_R10,
+
+    POS_L11,
+    POS_L12,
+    POS_L13,
+    POS_L14,
+    POS_L15,
+    POS_R11,
+    POS_R12,
+    POS_R13,
+    POS_R14,
+    POS_R15,
+
+    POS_LT1,
+    POS_LT2,
+    POS_LT3,
+    POS_RT1,
+    POS_RT2,
+    POS_RT3,
+
+    KEYMAP_KEYS,
+    POS_NONE = KEYMAP_KEYS,
+};
 
 /* -------------------------------------------------------------------
  * Keycodes  (placeholders -- Keymap module will define encoding)
@@ -426,7 +437,7 @@ static const uint16_t keymap[KEYMAP_LAYERS][KEYMAP_KEYS] = {
  * ---------------------------------------------------------------- */
 
 struct hrm_assignment {
-    uint8_t position;
+    enum keymap_pos position;
     uint16_t depth_threshold_adc;
     uint32_t time_threshold_ms;
 };
@@ -453,12 +464,12 @@ static const struct hrm_assignment hrm_config_table[] = {
  * A modifier only fires when the opposite hand presses a key.
  * ---------------------------------------------------------------- */
 
-static const uint8_t left_hand_positions[] = {
+static const enum keymap_pos left_hand_positions[] = {
         POS_L01, POS_L02, POS_L03, POS_L04, POS_L05, POS_L06, POS_L07, POS_L08, POS_L09,
         POS_L10, POS_L11, POS_L12, POS_L13, POS_L14, POS_L15, POS_LT1, POS_LT2, POS_LT3,
 };
 
-static const uint8_t right_hand_positions[] = {
+static const enum keymap_pos right_hand_positions[] = {
         POS_R01, POS_R02, POS_R03, POS_R04, POS_R05, POS_R06, POS_R07, POS_R08, POS_R09,
         POS_R10, POS_R11, POS_R12, POS_R13, POS_R14, POS_R15, POS_RT1, POS_RT2, POS_RT3,
 };
@@ -471,50 +482,48 @@ static const uint8_t right_hand_positions[] = {
  *
  * Chord timeout: 50ms (adjustable).
  *
- * positions[]  Physical key positions (0xFF terminated).
+ * positions[]  Physical key positions (POS_NONE terminated).
  * output       Keycode produced when all keys are pressed.
  * ---------------------------------------------------------------- */
 
-#define COMBO_END 0xFF
-
 struct combo_config {
-    uint8_t positions[5];
+    enum keymap_pos positions[5];
     uint16_t output;
 };
 
 static const struct combo_config combo_table[KEYMAP_COMBOS] = {
 
         /* -- Editing (vertical: top + home) -- */
-        {{POS_L02, POS_L07, COMBO_END}, KC_ESC},  /* w+r  */
-        {{POS_L03, POS_L08, COMBO_END}, KC_TAB},  /* f+s  */
-        {{POS_R03, POS_R08, COMBO_END}, KC_DEL},  /* u+e  */
-        {{POS_R04, POS_R09, COMBO_END}, CW_TOGG}, /* y+i  -> Caps Word */
+        {{POS_L02, POS_L07, POS_NONE}, KC_ESC},  /* w+r  */
+        {{POS_L03, POS_L08, POS_NONE}, KC_TAB},  /* f+s  */
+        {{POS_R03, POS_R08, POS_NONE}, KC_DEL},  /* u+e  */
+        {{POS_R04, POS_R09, POS_NONE}, CW_TOGG}, /* y+i  -> Caps Word */
 
         /* -- Brackets (vertical: home + bottom) -- */
-        {{POS_L07, POS_L12, COMBO_END}, KC_LBRC}, /* r+x  -> [  */
-        {{POS_L08, POS_L13, COMBO_END}, KC_LPRN}, /* s+c  -> (  */
-        {{POS_L09, POS_L14, COMBO_END}, KC_LCBR}, /* t+d  -> {  */
-        {{POS_R07, POS_R12, COMBO_END}, KC_RCBR}, /* n+h  -> }  */
-        {{POS_R08, POS_R13, COMBO_END}, KC_RPRN}, /* e+,  -> )  */
-        {{POS_R09, POS_R14, COMBO_END}, KC_RBRC}, /* i+.  -> ]  */
+        {{POS_L07, POS_L12, POS_NONE}, KC_LBRC}, /* r+x  -> [  */
+        {{POS_L08, POS_L13, POS_NONE}, KC_LPRN}, /* s+c  -> (  */
+        {{POS_L09, POS_L14, POS_NONE}, KC_LCBR}, /* t+d  -> {  */
+        {{POS_R07, POS_R12, POS_NONE}, KC_RCBR}, /* n+h  -> }  */
+        {{POS_R08, POS_R13, POS_NONE}, KC_RPRN}, /* e+,  -> )  */
+        {{POS_R09, POS_R14, POS_NONE}, KC_RBRC}, /* i+.  -> ]  */
 
         /* -- Displaced keys (vertical) -- */
-        {{POS_R02, POS_R07, COMBO_END}, KC_BSLS}, /* l+n  -> \  */
-        {{POS_L01, POS_L06, COMBO_END}, KC_GRV},  /* q+a  -> `  */
-        {{POS_R05, POS_R10, COMBO_END}, KC_TILD}, /* '+o  -> ~  */
-        {{POS_L04, POS_L09, COMBO_END}, OS_HYPR}, /* p+t  -> Hyper */
+        {{POS_R02, POS_R07, POS_NONE}, KC_BSLS}, /* l+n  -> \  */
+        {{POS_L01, POS_L06, POS_NONE}, KC_GRV},  /* q+a  -> `  */
+        {{POS_R05, POS_R10, POS_NONE}, KC_TILD}, /* '+o  -> ~  */
+        {{POS_L04, POS_L09, POS_NONE}, OS_HYPR}, /* p+t  -> Hyper */
 
         /* -- Programming shortcuts (horizontal) -- */
-        {{POS_R13, POS_R14, COMBO_END}, KC_MINS}, /* ,+.  -> -  */
-        {{POS_R14, POS_R15, COMBO_END}, KC_EQL},  /* .+;  -> =  */
-        {{POS_R12, POS_R13, COMBO_END}, KC_UNDS}, /* h+,  -> _  */
-        {{POS_L12, POS_L13, COMBO_END}, KC_CAPS}, /* x+c  -> Caps Lock */
+        {{POS_R13, POS_R14, POS_NONE}, KC_MINS}, /* ,+.  -> -  */
+        {{POS_R14, POS_R15, POS_NONE}, KC_EQL},  /* .+;  -> =  */
+        {{POS_R12, POS_R13, POS_NONE}, KC_UNDS}, /* h+,  -> _  */
+        {{POS_L12, POS_L13, POS_NONE}, KC_CAPS}, /* x+c  -> Caps Lock */
 
         /* -- Layer toggles -- */
-        {{POS_LT1, POS_LT2, POS_LT3, COMBO_END}, TG(L_GAME)},    /* all L thumbs -> Gaming  */
-        {{POS_RT1, POS_RT2, POS_RT3, COMBO_END}, TG(L_GAMEALT)}, /* all R thumbs -> Game Alt */
-        {{POS_LT1, POS_RT3, COMBO_END}, TG(L_NOMOD)},            /* outer thumbs -> Nomods  */
-        {{POS_LT1, POS_LT2, POS_RT2, POS_RT3, COMBO_END}, TG(L_ORIGIN)}, /* 4 thumbs -> Origin */
+        {{POS_LT1, POS_LT2, POS_LT3, POS_NONE}, TG(L_GAME)},    /* all L thumbs -> Gaming  */
+        {{POS_RT1, POS_RT2, POS_RT3, POS_NONE}, TG(L_GAMEALT)}, /* all R thumbs -> Game Alt */
+        {{POS_LT1, POS_RT3, POS_NONE}, TG(L_NOMOD)},            /* outer thumbs -> Nomods  */
+        {{POS_LT1, POS_LT2, POS_RT2, POS_RT3, POS_NONE}, TG(L_ORIGIN)}, /* 4 thumbs -> Origin */
 };
 
 /* -------------------------------------------------------------------
@@ -525,8 +534,8 @@ static const struct combo_config combo_table[KEYMAP_COMBOS] = {
  * ---------------------------------------------------------------- */
 
 struct socd_assignment {
-    uint8_t pos_a;
-    uint8_t pos_b;
+    enum keymap_pos pos_a;
+    enum keymap_pos pos_b;
 };
 
 static const struct socd_assignment socd_table[KEYMAP_SOCD_PAIRS] = {
