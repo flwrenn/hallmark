@@ -30,6 +30,7 @@ set(ALGO_SOURCES
     ${FIRMWARE_SRC_DIR}/rapid_trigger.c
     ${FIRMWARE_SRC_DIR}/home_row_mod.c
     ${FIRMWARE_SRC_DIR}/socd.c
+    ${FIRMWARE_SRC_DIR}/keymap_config.c
 )
 
 if(ALGO_SOURCES)

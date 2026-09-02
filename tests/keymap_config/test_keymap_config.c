@@ -20,7 +20,7 @@ void tearDown(void)
 
 static uint16_t base_key(int pos)
 {
-    return keymap[L_BASE][pos];
+    return keymap_layers[L_BASE][pos];
 }
 
 void test_positions_index_layers_row_major(void)
@@ -45,9 +45,9 @@ void test_hrm_table_targets_home_row_keys(void)
 {
     static const uint16_t expected[] = {HM_A, HM_R, HM_S, HM_T, HM_N, HM_E, HM_I, HM_O};
 
-    TEST_ASSERT_EQUAL_size_t(8, HRM_CONFIG_COUNT);
-    for (size_t i = 0; i < HRM_CONFIG_COUNT; i++) {
-        TEST_ASSERT_EQUAL_HEX16(expected[i], base_key(hrm_config_table[i].position));
+    TEST_ASSERT_EQUAL_size_t(8, KEYMAP_HRM_COUNT);
+    for (size_t i = 0; i < KEYMAP_HRM_COUNT; i++) {
+        TEST_ASSERT_EQUAL_HEX16(expected[i], base_key(keymap_hrm_table[i].position));
     }
 }
 
@@ -55,26 +55,25 @@ void test_hrm_table_splits_evenly_across_hands(void)
 {
     size_t left = 0;
 
-    for (size_t i = 0; i < HRM_CONFIG_COUNT; i++) {
-        for (size_t j = 0; j < LEFT_HAND_COUNT; j++) {
-            if (left_hand_positions[j] == hrm_config_table[i].position) {
+    for (size_t i = 0; i < KEYMAP_HRM_COUNT; i++) {
+        for (size_t j = 0; j < KEYMAP_HAND_KEYS; j++) {
+            if (keymap_left_hand[j] == keymap_hrm_table[i].position) {
                 left++;
             }
         }
     }
-    TEST_ASSERT_EQUAL_size_t(HRM_CONFIG_COUNT / 2, left);
+    TEST_ASSERT_EQUAL_size_t(KEYMAP_HRM_COUNT / 2, left);
 }
 
 void test_hand_sets_partition_all_keys(void)
 {
     uint8_t seen[KEYMAP_KEYS] = {0};
 
-    TEST_ASSERT_EQUAL_size_t(LEFT_HAND_COUNT, RIGHT_HAND_COUNT);
-    for (size_t i = 0; i < LEFT_HAND_COUNT; i++) {
-        seen[left_hand_positions[i]]++;
+    for (size_t i = 0; i < KEYMAP_HAND_KEYS; i++) {
+        seen[keymap_left_hand[i]]++;
     }
-    for (size_t i = 0; i < RIGHT_HAND_COUNT; i++) {
-        seen[right_hand_positions[i]]++;
+    for (size_t i = 0; i < KEYMAP_HAND_KEYS; i++) {
+        seen[keymap_right_hand[i]]++;
     }
     for (size_t p = 0; p < KEYMAP_KEYS; p++) {
         TEST_ASSERT_EQUAL_UINT8(1, seen[p]);
@@ -84,24 +83,24 @@ void test_hand_sets_partition_all_keys(void)
 void test_combos_are_well_formed(void)
 {
     for (size_t i = 0; i < KEYMAP_COMBOS; i++) {
-        const struct combo_config *c = &combo_table[i];
+        const struct keymap_combo *c = &keymap_combos[i];
         size_t n = 0;
 
-        while (n < 5 && c->positions[n] != POS_NONE) {
+        while (n <= KEYMAP_COMBO_MAX_KEYS && c->positions[n] != POS_NONE) {
             TEST_ASSERT_LESS_THAN_INT(KEYMAP_KEYS, c->positions[n]);
             n++;
         }
         TEST_ASSERT_GREATER_OR_EQUAL_size_t(2, n);
-        TEST_ASSERT_LESS_THAN_size_t(5, n);
+        TEST_ASSERT_LESS_OR_EQUAL_size_t(KEYMAP_COMBO_MAX_KEYS, n);
     }
 }
 
 void test_socd_pairs_are_opposing_gaming_keys(void)
 {
-    TEST_ASSERT_EQUAL_HEX16(KC_W, keymap[L_GAME][socd_table[0].pos_a]);
-    TEST_ASSERT_EQUAL_HEX16(KC_S, keymap[L_GAME][socd_table[0].pos_b]);
-    TEST_ASSERT_EQUAL_HEX16(KC_A, keymap[L_GAME][socd_table[1].pos_a]);
-    TEST_ASSERT_EQUAL_HEX16(KC_D, keymap[L_GAME][socd_table[1].pos_b]);
+    TEST_ASSERT_EQUAL_HEX16(KC_W, keymap_layers[L_GAME][keymap_socd_pairs[0].pos_a]);
+    TEST_ASSERT_EQUAL_HEX16(KC_S, keymap_layers[L_GAME][keymap_socd_pairs[0].pos_b]);
+    TEST_ASSERT_EQUAL_HEX16(KC_A, keymap_layers[L_GAME][keymap_socd_pairs[1].pos_a]);
+    TEST_ASSERT_EQUAL_HEX16(KC_D, keymap_layers[L_GAME][keymap_socd_pairs[1].pos_b]);
 }
 
 int main(void)

@@ -9,4 +9,5 @@ target_sources(app PRIVATE
   src/rapid_trigger.c
   src/home_row_mod.c
   src/socd.c
+  src/keymap_config.c
 )
