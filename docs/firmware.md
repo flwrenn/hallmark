@@ -8,7 +8,7 @@
 | Zephyr RTOS | Hardware abstraction via devicetree (no hardcoded pins), built-in drivers for SAADC/GPIO/UART/USB, and the kernel handles threading and power states. |
 | CAF (Common Application Framework) | Event-driven module system from Nordic's nRF Desktop reference. Modules communicate via typed events instead of direct function calls -- keeps things decoupled. |
 | PPI (Programmable Peripheral Interconnect) | nRF52840 hardware automation chains timer -> GPIO (MUX select) -> SAADC -> DMA -> RAM. CPU sleeps during the entire 18-key scan. |
-| C11 | Required by Zephyr. |
+| C11 | Zephyr defaults to C99; `CONFIG_STD_C11=y` in `firmware/prj.conf` selects C11 to match the host tests (`CMAKE_C_STANDARD 11`) and allow `_Static_assert`. |
 
 ## Modules
 
@@ -21,6 +21,7 @@
 | Rapid Trigger | Central | Per-key actuation via direction reversal FSM | `rapid_trigger.c` |
 | Home Row Mod | Central | Depth + time hybrid tap/hold decision | `home_row_mod.c` |
 | SOCD | Central | Last-input-wins opposing key resolution | `socd.c` |
+| Keymap config | Central | Layer arrays, HRM thresholds, hand sets, combos, SOCD pairs as `const` tables. Vocabulary (layers, positions, keycodes, action encoding) in `keymap_config.h`. | `keymap_config.c` |
 
 ### Planned
 
@@ -30,7 +31,7 @@
 | Rapid Trigger | Central | Per-key actuation detection with direction reversal |
 | Home Row Mod | Central | Depth + time hybrid tap/hold decision |
 | SOCD | Central | Simultaneous opposing key resolution |
-| Keymap | Central | Layers, combos, macros. Config in `firmware/include/keymap_config.h`. |
+| Keymap | Central | Layers, combos, macros. Consumes the Keymap config tables. |
 | Transport | All | UART (Phase 1) or BLE (Phase 2) between halves |
 | Calibration | Each half | Boot auto-zero, runtime drift compensation |
 | Power Manager | Each half | Adaptive scan rate, deep sleep, battery monitoring |
