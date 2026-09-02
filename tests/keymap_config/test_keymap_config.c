@@ -103,6 +103,101 @@ void test_socd_pairs_are_opposing_gaming_keys(void)
     TEST_ASSERT_EQUAL_HEX16(KC_D, keymap_layers[L_GAME][keymap_socd_pairs[1].pos_b]);
 }
 
+void test_action_aliases_are_distinct(void)
+{
+    static const uint16_t aliases[] = {
+            KC_TRNS,
+            KC_A,
+            KC_1,
+            KC_QUOT,
+            KC_ESC,
+            KC_LEFT,
+            KC_F1,
+            KC_LSFT,
+            KC_RGUI,
+            KC_EXLM,
+            KC_AT,
+            KC_HASH,
+            KC_DLR,
+            KC_PERC,
+            KC_CIRC,
+            KC_AMPR,
+            KC_ASTR,
+            KC_LPRN,
+            KC_RPRN,
+            KC_UNDS,
+            KC_PLUS,
+            KC_LCBR,
+            KC_RCBR,
+            KC_PIPE,
+            KC_TILD,
+            KC_QUES,
+            KC_EUR,
+            MC_PTAB,
+            MC_NTAB,
+            MC_BACK,
+            MC_FWD,
+            MC_PREV,
+            MC_NEXT,
+            MC_PLAY,
+            MC_BRUP,
+            MC_BRDN,
+            MC_VOLU,
+            MC_VOLD,
+            MC_MUTE,
+            OS_LSFT,
+            OS_LCTL,
+            OS_LALT,
+            OS_LGUI,
+            OS_RSFT,
+            OS_RCTL,
+            OS_RALT,
+            OS_RGUI,
+            OS_HYPR,
+            CW_TOGG,
+            HM_A,
+            HM_R,
+            HM_S,
+            HM_T,
+            HM_N,
+            HM_E,
+            HM_I,
+            HM_O,
+            HM_7,
+            HM_5,
+            HM_3,
+            HM_1,
+            HM_0,
+            HM_2,
+            HM_4,
+            HM_6,
+            MO_NAV,
+            MO_SYM,
+            MO_NUM,
+            MO_GNUM,
+            KM_TG(L_GAME),
+            KM_TG(L_GAMEALT),
+            KM_TG(L_NOMOD),
+            KM_TG(L_ORIGIN),
+    };
+    const size_t n = sizeof(aliases) / sizeof(aliases[0]);
+
+    for (size_t i = 0; i < n; i++) {
+        for (size_t j = i + 1; j < n; j++) {
+            TEST_ASSERT_NOT_EQUAL_HEX16(aliases[i], aliases[j]);
+        }
+    }
+}
+
+void test_action_kind_survives_encoding(void)
+{
+    TEST_ASSERT_EQUAL_HEX16(KM_KIND_HRM, KM_KIND(HM_A));
+    TEST_ASSERT_EQUAL_HEX16(KM_KIND_HRM, KM_KIND(HM_O));
+    TEST_ASSERT_EQUAL_HEX16(KM_KIND_TH, KM_KIND(MO_GNUM));
+    TEST_ASSERT_EQUAL_HEX16(KM_KIND_UC, KM_KIND(KC_EUR));
+    TEST_ASSERT_NOT_EQUAL_HEX16(KM_UC(0x00AC), KM_UC(0x20AC));
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -113,6 +208,8 @@ int main(void)
     RUN_TEST(test_hand_sets_partition_all_keys);
     RUN_TEST(test_combos_are_well_formed);
     RUN_TEST(test_socd_pairs_are_opposing_gaming_keys);
+    RUN_TEST(test_action_aliases_are_distinct);
+    RUN_TEST(test_action_kind_survives_encoding);
 
     return UNITY_END();
 }
