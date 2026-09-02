@@ -18,6 +18,8 @@
  *   L06  L07  L08  L09  L10    R06  R07  R08  R09  R10
  *   L11  L12  L13  L14  L15    R11  R12  R13  R14  R15
  *              LT1  LT2  LT3    RT1  RT2  RT3
+ *
+ * ___ in the per-layer diagrams is KC_TRNS.
  * ---------------------------------------------------------------- */
 
 const uint16_t keymap_layers[KEYMAP_LAYERS][KEYMAP_KEYS] = {
@@ -44,7 +46,7 @@ const uint16_t keymap_layers[KEYMAP_LAYERS][KEYMAP_KEYS] = {
         [L_SYM] = {KC_ESC,  KC_LBRC, KC_LCBR, KC_LPRN, KC_TILD, KC_CIRC, KC_RPRN, KC_RCBR, KC_RBRC,
                    KC_GRV,  KC_MINS, KC_ASTR, KC_EQL,  KC_UNDS, KC_DLR,  KC_EUR,  OS_RGUI, OS_RALT,
                    OS_RCTL, OS_RSFT, KC_PLUS, KC_PIPE, KC_AT,   KC_SLSH, KC_PERC, KC_HASH, KC_BSLS,
-                   KC_AMPR, KC_QUES, KC_EXLM, MO_NUM,  ___,     ___,     ___,     ___,     ___},
+                   KC_AMPR, KC_QUES, KC_EXLM, MO_NUM,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS},
 
         /* Layer 2: Navigation
          *
@@ -56,7 +58,7 @@ const uint16_t keymap_layers[KEYMAP_LAYERS][KEYMAP_KEYS] = {
         [L_NAV] = {KC_TAB,  MC_PTAB, MC_NTAB, MC_VOLD, MC_VOLU, MC_BACK, MC_FWD,  KC_HOME, KC_END,
                    KC_DEL,  OS_LSFT, OS_LCTL, OS_LALT, OS_LGUI, MC_MUTE, KC_LEFT, KC_DOWN, KC_UP,
                    KC_RGHT, KC_BSPC, MC_BRDN, MC_BRUP, MC_PREV, MC_NEXT, MC_PLAY, KC_CAPS, KC_PGDN,
-                   KC_PGUP, KC_INS,  KC_ENT,  ___,     ___,     ___,     MO_NUM,  ___,     ___},
+                   KC_PGUP, KC_INS,  KC_ENT,  KC_TRNS, KC_TRNS, KC_TRNS, MO_NUM,  KC_TRNS, KC_TRNS},
 
         /* Layer 3: Numeric
          *
@@ -65,10 +67,10 @@ const uint16_t keymap_layers[KEYMAP_LAYERS][KEYMAP_KEYS] = {
          *   F7    F5    F3    F1    F9         F8    F12   F2    F4    F6
          *               ___   ___   ___        ___   ___   ___
          */
-        [L_NUM] = {KC_F10, KC_F11, ___,   ___,   ___,   ___,   ___,   ___,   ___,
-                   ___,    HM_7,   HM_5,  HM_3,  HM_1,  KC_9,  KC_8,  HM_0,  HM_2,
-                   HM_4,   HM_6,   KC_F7, KC_F5, KC_F3, KC_F1, KC_F9, KC_F8, KC_F12,
-                   KC_F2,  KC_F4,  KC_F6, ___,   ___,   ___,   ___,   ___,   ___},
+        [L_NUM] = {KC_F10,  KC_F11, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                   KC_TRNS, HM_7,   HM_5,    HM_3,    HM_1,    KC_9,    KC_8,    HM_0,    HM_2,
+                   HM_4,    HM_6,   KC_F7,   KC_F5,   KC_F3,   KC_F1,   KC_F9,   KC_F8,   KC_F12,
+                   KC_F2,   KC_F4,  KC_F6,   KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS},
 
         /* Layer 4: Gaming
          *
@@ -77,10 +79,11 @@ const uint16_t keymap_layers[KEYMAP_LAYERS][KEYMAP_KEYS] = {
          *   LSf   Z     X     C     V          ___   ___   ___   ___   ___
          *               LCt   G/NUM Spc        ___   ___   ___
          */
-        [L_GAME] = {KC_TAB, KC_Q,   KC_W,    KC_E,    KC_R,    ___,    ___,  ___, ___,
-                    ___,    KC_ESC, KC_A,    KC_S,    KC_D,    KC_F,   ___,  ___, ___,
-                    ___,    ___,    KC_LSFT, KC_Z,    KC_X,    KC_C,   KC_V, ___, ___,
-                    ___,    ___,    ___,     KC_LCTL, MO_GNUM, KC_SPC, ___,  ___, ___},
+        [L_GAME] = {KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_TRNS, KC_TRNS, KC_TRNS,
+                    KC_TRNS, KC_TRNS, KC_ESC,  KC_A,    KC_S,    KC_D,    KC_F,    KC_TRNS,
+                    KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_LSFT, KC_Z,    KC_X,    KC_C,
+                    KC_V,    KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_LCTL, MO_GNUM,
+                    KC_SPC,  KC_TRNS, KC_TRNS, KC_TRNS},
 
         /* Layer 5: Gaming Numbers  (hold LT2 from Gaming layer)
          *
@@ -89,9 +92,11 @@ const uint16_t keymap_layers[KEYMAP_LAYERS][KEYMAP_KEYS] = {
          *   F1    F2    F3    F4    F5         ___   ___   ___   ___   ___
          *               ___   ___   ___        ___   ___   ___
          */
-        [L_GAMENUM] = {KC_1,  KC_2, KC_3, KC_4, KC_5, ___, ___, ___, ___,   ___,   KC_6,  KC_7,
-                       KC_8,  KC_9, KC_0, ___,  ___,  ___, ___, ___, KC_F1, KC_F2, KC_F3, KC_F4,
-                       KC_F5, ___,  ___,  ___,  ___,  ___, ___, ___, ___,   ___,   ___,   ___},
+        [L_GAMENUM] = {KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_TRNS, KC_TRNS, KC_TRNS,
+                       KC_TRNS, KC_TRNS, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_TRNS,
+                       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_F1,   KC_F2,   KC_F3,   KC_F4,
+                       KC_F5,   KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS},
 
         /* Layer 6: Gaming Alt
          *
@@ -100,10 +105,11 @@ const uint16_t keymap_layers[KEYMAP_LAYERS][KEYMAP_KEYS] = {
          *   Tab   5     ___   F     G          P     ___   ___   ___   ___
          *               Ctl   Sft   Spc        ___   ___   ___
          */
-        [L_GAMEALT] = {KC_1, KC_2,   KC_W,   KC_3,    KC_4,    KC_6,   ___,  ___,  ___,
-                       ___,  KC_Q,   KC_A,   KC_S,    KC_D,    KC_E,   KC_T, KC_B, KC_V,
-                       KC_Y, KC_ESC, KC_TAB, KC_5,    ___,     KC_F,   KC_G, KC_P, ___,
-                       ___,  ___,    ___,    KC_LCTL, KC_LSFT, KC_SPC, ___,  ___,  ___},
+        [L_GAMEALT] = {KC_1,    KC_2,    KC_W,    KC_3,    KC_4,    KC_6,    KC_TRNS, KC_TRNS,
+                       KC_TRNS, KC_TRNS, KC_Q,    KC_A,    KC_S,    KC_D,    KC_E,    KC_T,
+                       KC_B,    KC_V,    KC_Y,    KC_ESC,  KC_TAB,  KC_5,    KC_TRNS, KC_F,
+                       KC_G,    KC_P,    KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_LCTL, KC_LSFT,
+                       KC_SPC,  KC_TRNS, KC_TRNS, KC_TRNS},
 
         /* Layer 7: Nomods
          *
@@ -208,10 +214,10 @@ const struct keymap_combo keymap_combos[] = {
         {{POS_L12, POS_L13, POS_NONE}, KC_CAPS}, /* x+c  -> Caps Lock */
 
         /* -- Layer toggles -- */
-        {{POS_LT1, POS_LT2, POS_LT3, POS_NONE}, TG(L_GAME)},    /* all L thumbs -> Gaming  */
-        {{POS_RT1, POS_RT2, POS_RT3, POS_NONE}, TG(L_GAMEALT)}, /* all R thumbs -> Game Alt */
-        {{POS_LT1, POS_RT3, POS_NONE}, TG(L_NOMOD)},            /* outer thumbs -> Nomods  */
-        {{POS_LT1, POS_LT2, POS_RT2, POS_RT3, POS_NONE}, TG(L_ORIGIN)}, /* 4 thumbs -> Origin */
+        {{POS_LT1, POS_LT2, POS_LT3, POS_NONE}, KM_TG(L_GAME)},    /* all L thumbs -> Gaming  */
+        {{POS_RT1, POS_RT2, POS_RT3, POS_NONE}, KM_TG(L_GAMEALT)}, /* all R thumbs -> Game Alt */
+        {{POS_LT1, POS_RT3, POS_NONE}, KM_TG(L_NOMOD)},            /* outer thumbs -> Nomods  */
+        {{POS_LT1, POS_LT2, POS_RT2, POS_RT3, POS_NONE}, KM_TG(L_ORIGIN)}, /* 4 thumbs -> Origin */
 };
 
 _Static_assert(KEYMAP_LEN(keymap_combos) == KEYMAP_COMBOS, "KEYMAP_COMBOS");

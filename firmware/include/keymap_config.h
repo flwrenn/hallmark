@@ -96,8 +96,7 @@ enum keymap_pos {
  * ---------------------------------------------------------------- */
 
 /* Special */
-#define ___ 0x0000 /* Transparent: falls through to layer below */
-#define XXX 0x0001 /* Blocked: no output                       */
+#define KC_TRNS 0x0000 /* Transparent: falls through to layer below */
 
 /* Alphas (USB HID usage page 0x07) */
 #define KC_A 0x04
@@ -199,101 +198,101 @@ enum keymap_pos {
 /*
  * Actions  (encoding TBD by Keymap module)
  *
- * MO(layer)        Momentary layer hold
- * TG(layer)        Toggle layer on/off
- * TH(tap, layer)   Tap for key, hold for momentary layer
- * OS(mod)          One-shot modifier
- * HRM(tap, mod)    Home row mod: tap for key, hold for modifier
- * S(kc)            Shifted keycode
- * UC(cp)           Unicode codepoint
- * MACRO(id)        Predefined macro
+ * KM_MO(layer)        Momentary layer hold
+ * KM_TG(layer)        Toggle layer on/off
+ * KM_TH(tap, layer)   Tap for key, hold for momentary layer
+ * KM_OS(mod)          One-shot modifier
+ * KM_HRM(tap, mod)    Home row mod: tap for key, hold for modifier
+ * KM_S(kc)            Shifted keycode
+ * KM_UC(cp)           Unicode codepoint
+ * KM_MACRO(id)        Predefined macro
  */
-#define MO(l)     (0x5000 | (l))
-#define TG(l)     (0x5100 | (l))
-#define TH(t, l)  (0x5200 | ((l) << 8) | (t))
-#define OS(m)     (0x5300 | (m))
-#define HRM(t, m) (0x5400 | ((m) << 8) | (t))
-#define S(kc)     (0x0100 | (kc))
-#define UC(cp)    (0x6000 | (cp))
-#define MACRO(id) (0x7000 | (id))
+#define KM_MO(l)     (0x5000 | (l))
+#define KM_TG(l)     (0x5100 | (l))
+#define KM_TH(t, l)  (0x5200 | ((l) << 8) | (t))
+#define KM_OS(m)     (0x5300 | (m))
+#define KM_HRM(t, m) (0x5400 | ((m) << 8) | (t))
+#define KM_S(kc)     (0x0100 | (kc))
+#define KM_UC(cp)    (0x6000 | (cp))
+#define KM_MACRO(id) (0x7000 | (id))
 
 /* Shifted key aliases */
-#define KC_EXLM S(KC_1)    /* ! */
-#define KC_AT   S(KC_2)    /* @ */
-#define KC_HASH S(KC_3)    /* # */
-#define KC_DLR  S(KC_4)    /* $ */
-#define KC_PERC S(KC_5)    /* % */
-#define KC_CIRC S(KC_6)    /* ^ */
-#define KC_AMPR S(KC_7)    /* & */
-#define KC_ASTR S(KC_8)    /* * */
-#define KC_LPRN S(KC_9)    /* ( */
-#define KC_RPRN S(KC_0)    /* ) */
-#define KC_UNDS S(KC_MINS) /* _ */
-#define KC_PLUS S(KC_EQL)  /* + */
-#define KC_LCBR S(KC_LBRC) /* { */
-#define KC_RCBR S(KC_RBRC) /* } */
-#define KC_PIPE S(KC_BSLS) /* | */
-#define KC_TILD S(KC_GRV)  /* ~ */
-#define KC_QUES S(KC_SLSH) /* ? */
+#define KC_EXLM KM_S(KC_1)    /* ! */
+#define KC_AT   KM_S(KC_2)    /* @ */
+#define KC_HASH KM_S(KC_3)    /* # */
+#define KC_DLR  KM_S(KC_4)    /* $ */
+#define KC_PERC KM_S(KC_5)    /* % */
+#define KC_CIRC KM_S(KC_6)    /* ^ */
+#define KC_AMPR KM_S(KC_7)    /* & */
+#define KC_ASTR KM_S(KC_8)    /* * */
+#define KC_LPRN KM_S(KC_9)    /* ( */
+#define KC_RPRN KM_S(KC_0)    /* ) */
+#define KC_UNDS KM_S(KC_MINS) /* _ */
+#define KC_PLUS KM_S(KC_EQL)  /* + */
+#define KC_LCBR KM_S(KC_LBRC) /* { */
+#define KC_RCBR KM_S(KC_RBRC) /* } */
+#define KC_PIPE KM_S(KC_BSLS) /* | */
+#define KC_TILD KM_S(KC_GRV)  /* ~ */
+#define KC_QUES KM_S(KC_SLSH) /* ? */
 
 /* Unicode aliases */
-#define KC_EUR UC(0x20AC) /* Euro sign */
+#define KC_EUR KM_UC(0x20AC) /* Euro sign */
 
 /* Macro aliases */
-#define MC_PTAB MACRO(0)  /* Ctrl+Shift+Tab (previous tab) */
-#define MC_NTAB MACRO(1)  /* Ctrl+Tab (next tab)           */
-#define MC_BACK MACRO(2)  /* Browser back                  */
-#define MC_FWD  MACRO(3)  /* Browser forward               */
-#define MC_PREV MACRO(4)  /* Media previous track          */
-#define MC_NEXT MACRO(5)  /* Media next track              */
-#define MC_PLAY MACRO(6)  /* Media play/pause              */
-#define MC_BRUP MACRO(7)  /* Brightness up                 */
-#define MC_BRDN MACRO(8)  /* Brightness down               */
-#define MC_VOLU MACRO(9)  /* Volume up                     */
-#define MC_VOLD MACRO(10) /* Volume down                   */
-#define MC_MUTE MACRO(11) /* Mute                          */
+#define MC_PTAB KM_MACRO(0)  /* Ctrl+Shift+Tab (previous tab) */
+#define MC_NTAB KM_MACRO(1)  /* Ctrl+Tab (next tab)           */
+#define MC_BACK KM_MACRO(2)  /* Browser back                  */
+#define MC_FWD  KM_MACRO(3)  /* Browser forward               */
+#define MC_PREV KM_MACRO(4)  /* Media previous track          */
+#define MC_NEXT KM_MACRO(5)  /* Media next track              */
+#define MC_PLAY KM_MACRO(6)  /* Media play/pause              */
+#define MC_BRUP KM_MACRO(7)  /* Brightness up                 */
+#define MC_BRDN KM_MACRO(8)  /* Brightness down               */
+#define MC_VOLU KM_MACRO(9)  /* Volume up                     */
+#define MC_VOLD KM_MACRO(10) /* Volume down                   */
+#define MC_MUTE KM_MACRO(11) /* Mute                          */
 
 /* One-shot modifier aliases */
-#define OS_LSFT OS(KC_LSFT)
-#define OS_LCTL OS(KC_LCTL)
-#define OS_LALT OS(KC_LALT)
-#define OS_LGUI OS(KC_LGUI)
-#define OS_RSFT OS(KC_RSFT)
-#define OS_RCTL OS(KC_RCTL)
-#define OS_RALT OS(KC_RALT)
-#define OS_RGUI OS(KC_RGUI)
+#define OS_LSFT KM_OS(KC_LSFT)
+#define OS_LCTL KM_OS(KC_LCTL)
+#define OS_LALT KM_OS(KC_LALT)
+#define OS_LGUI KM_OS(KC_LGUI)
+#define OS_RSFT KM_OS(KC_RSFT)
+#define OS_RCTL KM_OS(KC_RCTL)
+#define OS_RALT KM_OS(KC_RALT)
+#define OS_RGUI KM_OS(KC_RGUI)
 
 /* One-shot hyper (Shift+Ctrl+Alt+GUI) */
-#define OS_HYPR MACRO(12)
+#define OS_HYPR KM_MACRO(12)
 
 /* Caps Word toggle (auto-deactivates after non-alpha; firmware TBD) */
-#define CW_TOGG MACRO(13)
+#define CW_TOGG KM_MACRO(13)
 
 /* Home row mod aliases */
-#define HM_A HRM(KC_A, KC_LSFT)
-#define HM_R HRM(KC_R, KC_LCTL)
-#define HM_S HRM(KC_S, KC_LALT)
-#define HM_T HRM(KC_T, KC_LGUI)
-#define HM_N HRM(KC_N, KC_RGUI)
-#define HM_E HRM(KC_E, KC_RALT)
-#define HM_I HRM(KC_I, KC_RCTL)
-#define HM_O HRM(KC_O, KC_RSFT)
+#define HM_A KM_HRM(KC_A, KC_LSFT)
+#define HM_R KM_HRM(KC_R, KC_LCTL)
+#define HM_S KM_HRM(KC_S, KC_LALT)
+#define HM_T KM_HRM(KC_T, KC_LGUI)
+#define HM_N KM_HRM(KC_N, KC_RGUI)
+#define HM_E KM_HRM(KC_E, KC_RALT)
+#define HM_I KM_HRM(KC_I, KC_RCTL)
+#define HM_O KM_HRM(KC_O, KC_RSFT)
 
 /* Numeric layer HRM aliases */
-#define HM_7 HRM(KC_7, KC_LSFT)
-#define HM_5 HRM(KC_5, KC_LCTL)
-#define HM_3 HRM(KC_3, KC_LALT)
-#define HM_1 HRM(KC_1, KC_LGUI)
-#define HM_0 HRM(KC_0, KC_RGUI)
-#define HM_2 HRM(KC_2, KC_RALT)
-#define HM_4 HRM(KC_4, KC_RCTL)
-#define HM_6 HRM(KC_6, KC_RSFT)
+#define HM_7 KM_HRM(KC_7, KC_LSFT)
+#define HM_5 KM_HRM(KC_5, KC_LCTL)
+#define HM_3 KM_HRM(KC_3, KC_LALT)
+#define HM_1 KM_HRM(KC_1, KC_LGUI)
+#define HM_0 KM_HRM(KC_0, KC_RGUI)
+#define HM_2 KM_HRM(KC_2, KC_RALT)
+#define HM_4 KM_HRM(KC_4, KC_RCTL)
+#define HM_6 KM_HRM(KC_6, KC_RSFT)
 
 /* Layer action aliases */
-#define MO_NAV  MO(L_NAV)
-#define MO_SYM  MO(L_SYM)
-#define MO_NUM  MO(L_NUM)
-#define MO_GNUM TH(KC_G, L_GAMENUM)
+#define MO_NAV  KM_MO(L_NAV)
+#define MO_SYM  KM_MO(L_SYM)
+#define MO_NUM  KM_MO(L_NUM)
+#define MO_GNUM KM_TH(KC_G, L_GAMENUM)
 
 /* -------------------------------------------------------------------
  * Configuration tables  (defined in firmware/src/keymap_config.c)
