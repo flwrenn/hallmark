@@ -4,10 +4,11 @@
  * 36-key Chocofi split keyboard. Colemak-DH base, SCAG home row mods,
  * 9 layers, 22 combos, 2 SOCD pairs.
  *
- * NOTE: Keycode values are placeholders. The Keymap firmware module
- * (not yet implemented) will define the actual encoding. Layer arrays
- * and config structs are structurally correct and ready to be wired
- * into the module.
+ * This header holds the vocabulary: layers, positions, keycodes,
+ * action encoding, and the table types.  The tables themselves are
+ * defined in firmware/src/keymap_config.c and checked by
+ * tests/keymap_config.  The Keymap module (not yet implemented) will
+ * consume both.
  */
 
 #ifndef KEYMAP_CONFIG_H
@@ -92,7 +93,7 @@ enum keymap_pos {
 };
 
 /* -------------------------------------------------------------------
- * Keycodes  (placeholders -- Keymap module will define encoding)
+ * Keycodes
  * ---------------------------------------------------------------- */
 
 /* Special */
