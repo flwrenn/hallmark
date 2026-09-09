@@ -21,15 +21,10 @@ jobs:
       - name: Set PR to PR Open
         if: env.PROJECT_TOKEN != ''
         uses: actions/github-script@v7
-        env:
-          # "Status" single-select field
-          STATUS_FIELD_ID: PVTSSF_lAHOBh2HNc4BPjfGzg97gkw
-          # "PR Open" option
-          PR_OPEN_OPTION_ID: df73e18b
         with:
           github-token: ${{ env.PROJECT_TOKEN }}
           script: |
-            const { findProjectItem, setFieldValue } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/project.js`);
+            const { findProjectItem, setFieldValue, STATUS_FIELD_ID, PR_OPEN_OPTION_ID } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/project.js`);
             const pr = context.payload.pull_request;
             const attempts = 5;
             try {
@@ -38,8 +33,8 @@ jobs:
                 core.warning(`PR #${pr.number} not in project after ${attempts} attempts. Verify project automation and token permissions.`);
                 return;
               }
-              await setFieldValue(github, item.id, process.env.STATUS_FIELD_ID, {
-                singleSelectOptionId: process.env.PR_OPEN_OPTION_ID,
+              await setFieldValue(github, item.id, STATUS_FIELD_ID, {
+                singleSelectOptionId: PR_OPEN_OPTION_ID,
               });
               console.log(`PR #${pr.number} -> PR Open`);
             } catch (error) {

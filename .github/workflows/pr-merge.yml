@@ -54,13 +54,11 @@ jobs:
         if: steps.close-issues.outputs.closed != '[]' && env.PROJECT_TOKEN != ''
         uses: actions/github-script@v7
         env:
-          # "End date" custom field
-          END_DATE_FIELD_ID: PVTF_lAHOBh2HNc4BPjfGzg97glk
           CLOSED: ${{ steps.close-issues.outputs.closed }}
         with:
           github-token: ${{ env.PROJECT_TOKEN }}
           script: |
-            const { findProjectItem, setFieldValue } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/project.js`);
+            const { findProjectItem, setFieldValue, END_DATE_FIELD_ID } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/project.js`);
             const date = context.payload.pull_request.merged_at.slice(0, 10);
             for (const { number, nodeId } of JSON.parse(process.env.CLOSED)) {
               try {
@@ -69,7 +67,7 @@ jobs:
                   console.log(`#${number} not in project, skipping`);
                   continue;
                 }
-                await setFieldValue(github, item.id, process.env.END_DATE_FIELD_ID, { date });
+                await setFieldValue(github, item.id, END_DATE_FIELD_ID, { date });
                 console.log(`Set end date ${date} on #${number}`);
               } catch (error) {
                 core.warning(`Failed to set end date on #${number}: ${error.message}`);
