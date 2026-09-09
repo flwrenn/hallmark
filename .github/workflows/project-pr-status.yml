@@ -8,98 +8,35 @@ jobs:
   set-pr-status:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
     steps:
-      - name: Set PR to PR Open
-        uses: actions/github-script@v7
-        env:
-          # Hallmark project (users/flwrenn/projects/12)
-          PROJECT_ID: PVT_kwHOBh2HNc4BPjfG
-          # "Status" single-select field
-          STATUS_FIELD_ID: PVTSSF_lAHOBh2HNc4BPjfGzg97gkw
-          # "PR Open" option
-          PR_OPEN_OPTION_ID: df73e18b
+      - uses: actions/checkout@v4
         with:
-          github-token: ${{ secrets.PROJECT_TOKEN }}
+          ref: ${{ github.event.pull_request.base.ref }}
+          sparse-checkout: .github/scripts
+
+      - name: Set PR to PR Open
+        if: env.PROJECT_TOKEN != ''
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ env.PROJECT_TOKEN }}
           script: |
+            const { findProjectItem, setFieldValue, STATUS_FIELD_ID, PR_OPEN_OPTION_ID } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/project.js`);
             const pr = context.payload.pull_request;
-            const projectId = process.env.PROJECT_ID;
-            const fieldId = process.env.STATUS_FIELD_ID;
-            const prOpenOptionId = process.env.PR_OPEN_OPTION_ID;
-
-            const MAX_ATTEMPTS = 5;
-            const BASE_DELAY_MS = 3000;
-
-            function isTransient(error) {
-              if (!error.status) return true;
-              return [429, 502, 503, 504].includes(error.status);
-            }
-
-            async function findProjectItem(nodeId, attempt = 1) {
-              let result;
-              try {
-                result = await github.graphql(`
-                  query($nodeId: ID!) {
-                    node(id: $nodeId) {
-                      ... on PullRequest {
-                        projectItems(first: 10) {
-                          nodes { id project { id } }
-                        }
-                      }
-                    }
-                  }
-                `, { nodeId });
-              } catch (error) {
-                console.log(`GraphQL query failed (attempt ${attempt}/${MAX_ATTEMPTS}): ${error.message}`);
-                if (!isTransient(error)) {
-                  return { itemId: null, projectItems: [], error: error.message, attempts: attempt };
-                }
-              }
-
-              const nodes = result?.node?.projectItems?.nodes ?? [];
-              const item = nodes.find(i => i?.project?.id === projectId);
-
-              if (item) {
-                return { itemId: item.id, projectItems: nodes };
-              }
-
-              if (attempt < MAX_ATTEMPTS) {
-                const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
-                console.log(`PR not in project yet (attempt ${attempt}/${MAX_ATTEMPTS}), retrying in ${delay / 1000}s…`);
-                await new Promise(r => setTimeout(r, delay));
-                return findProjectItem(nodeId, attempt + 1);
-              }
-
-              return { itemId: null, projectItems: nodes, attempts: attempt };
-            }
-
-            const { itemId: prItemId, projectItems, error, attempts } = await findProjectItem(pr.node_id);
-
-            if (!prItemId) {
-              const foundIds = projectItems.map(i => i?.project?.id).filter(Boolean);
-              core.warning(
-                `PR #${pr.number} not found in project ${projectId} after ${attempts} attempt(s). ` +
-                `Found ${projectItems.length} project item(s)` +
-                (foundIds.length ? ` in project(s): ${foundIds.join(', ')}` : '') +
-                '. Verify project automation and token permissions.' +
-                (error ? ` Error: ${error}` : '')
-              );
-              return;
-            }
-
+            const attempts = 5;
             try {
-              await github.graphql(`
-                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                  updateProjectV2ItemFieldValue(input: {
-                    projectId: $projectId
-                    itemId: $itemId
-                    fieldId: $fieldId
-                    value: { singleSelectOptionId: $optionId }
-                  }) { projectV2Item { id } }
-                }
-              `, { projectId, itemId: prItemId, fieldId, optionId: prOpenOptionId });
+              const item = await findProjectItem(github, pr.node_id, { attempts });
+              if (!item) {
+                core.warning(`PR #${pr.number} not in project after ${attempts} attempts. Verify project automation and token permissions.`);
+                return;
+              }
+              await setFieldValue(github, item.id, STATUS_FIELD_ID, {
+                singleSelectOptionId: PR_OPEN_OPTION_ID,
+              });
+              console.log(`PR #${pr.number} -> PR Open`);
             } catch (error) {
               core.warning(`Failed to set PR #${pr.number} to PR Open: ${error.message}`);
-              return;
             }
-
-            console.log(`PR #${pr.number} → PR Open`);
