@@ -39,6 +39,16 @@ function referencedIssues(body) {
   return [...new Set(numbers)];
 }
 
+// A transport hiccup is worth another attempt. A 401, 403, or 404 is a token or
+// permission problem that the next four attempts would hit identically, so it
+// fails immediately rather than sleeping 45s first.
+function isTransient(error) {
+  if (!error?.status) {
+    return true;
+  }
+  return [429, 502, 503, 504].includes(error.status);
+}
+
 // The project item for an issue or PR node, or null when it is not in the project.
 // Retries cover the delay between an item being created and the built-in
 // "auto-add to project" automation picking it up.
@@ -54,6 +64,9 @@ async function findProjectItem(github, nodeId, { attempts = 1, baseDelayMs = 300
       }
       lastError = null;
     } catch (error) {
+      if (!isTransient(error)) {
+        throw error;
+      }
       lastError = error;
     }
     if (attempt < attempts) {
