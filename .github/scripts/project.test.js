@@ -77,6 +77,21 @@ test('findProjectItem retries past a transient error and succeeds', async () => 
   assert.equal(found.id, 'OK');
 });
 
+test('findProjectItem fails fast on a non-transient error instead of retrying', async () => {
+  const unauthorized = Object.assign(new Error('Bad credentials'), { status: 401 });
+  const github = fakeGithub([unauthorized, projectItems(item(PROJECT_ID, 'NEVER'))]);
+  await assert.rejects(findProjectItem(github, 'NODE', { attempts: 5 }), /Bad credentials/);
+  assert.equal(github.calls.length, 1);
+});
+
+test('findProjectItem retries a transient status error', async () => {
+  const gateway = Object.assign(new Error('Bad gateway'), { status: 502 });
+  const github = fakeGithub([gateway, projectItems(item(PROJECT_ID, 'OK'))]);
+  const found = await findProjectItem(github, 'NODE', { attempts: 2, baseDelayMs: 1 });
+  assert.equal(found.id, 'OK');
+  assert.equal(github.calls.length, 2);
+});
+
 test('findProjectItem throws the last error when every attempt errors', async () => {
   const github = fakeGithub([new Error('first'), new Error('last')]);
   await assert.rejects(findProjectItem(github, 'NODE', { attempts: 2, baseDelayMs: 1 }), /last/);
