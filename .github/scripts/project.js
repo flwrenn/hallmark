@@ -5,8 +5,12 @@
 //
 // `github` is the authenticated Octokit instance github-script injects.
 
-// Hallmark project (users/flwrenn/projects/12)
+// Hallmark project (users/flwrenn/projects/12). Every project identifier lives
+// here so a re-created field is one edit, not a hunt through workflow env blocks.
 const PROJECT_ID = 'PVT_kwHOBh2HNc4BPjfG';
+const STATUS_FIELD_ID = 'PVTSSF_lAHOBh2HNc4BPjfGzg97gkw';
+const PR_OPEN_OPTION_ID = 'df73e18b';
+const END_DATE_FIELD_ID = 'PVTF_lAHOBh2HNc4BPjfGzg97glk';
 
 const CLOSING_KEYWORD = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
 const HTML_COMMENT = /<!--[\s\S]*?-->/g;
@@ -84,4 +88,12 @@ async function setFieldValue(github, itemId, fieldId, value) {
   await github.graphql(SET_FIELD_MUTATION, { projectId: PROJECT_ID, itemId, fieldId, value });
 }
 
-module.exports = { PROJECT_ID, referencedIssues, findProjectItem, setFieldValue };
+module.exports = {
+  PROJECT_ID,
+  STATUS_FIELD_ID,
+  PR_OPEN_OPTION_ID,
+  END_DATE_FIELD_ID,
+  referencedIssues,
+  findProjectItem,
+  setFieldValue,
+};
