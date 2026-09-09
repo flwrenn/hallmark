@@ -1,0 +1,29 @@
+name: Scripts tests
+
+on:
+  pull_request:
+    paths:
+      - .github/scripts/**
+      - .github/workflows/scripts-test.yml
+  push:
+    branches: [dev, main]
+    paths:
+      - .github/scripts/**
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+
+      # Node 21+ expands the glob itself; the quoted pattern is the same command
+      # the contributor docs give for running these tests locally.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: node --test '.github/scripts/*.test.js'
