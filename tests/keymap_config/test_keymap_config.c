@@ -198,6 +198,20 @@ void test_action_kind_survives_encoding(void)
     TEST_ASSERT_NOT_EQUAL_HEX16(KM_UC(0x00AC), KM_UC(0x20AC));
 }
 
+void test_each_action_constructor_has_its_own_kind(void)
+{
+    static const uint16_t one_per_kind[] = {
+            KC_1, KC_EXLM, MO_NAV, KM_TG(L_GAME), MO_GNUM, OS_LSFT, HM_A, MC_PTAB, KC_EUR,
+    };
+    const size_t n = sizeof(one_per_kind) / sizeof(one_per_kind[0]);
+
+    for (size_t i = 0; i < n; i++) {
+        for (size_t j = i + 1; j < n; j++) {
+            TEST_ASSERT_NOT_EQUAL_HEX16(KM_KIND(one_per_kind[i]), KM_KIND(one_per_kind[j]));
+        }
+    }
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -210,6 +224,7 @@ int main(void)
     RUN_TEST(test_socd_pairs_are_opposing_gaming_keys);
     RUN_TEST(test_action_aliases_are_distinct);
     RUN_TEST(test_action_kind_survives_encoding);
+    RUN_TEST(test_each_action_constructor_has_its_own_kind);
 
     return UNITY_END();
 }
