@@ -205,12 +205,12 @@ enum keymap_pos {
  * final encoding.
  *
  *   0x00xx   basic keycode (HID usage page 0x07)
- *   0x01xx   KM_S(kc)          Shifted keycode
  *   0x1xxx   KM_MO(layer)      Momentary layer hold
  *   0x2xxx   KM_TG(layer)      Toggle layer on/off
  *   0x3lxx   KM_TH(tap, l)     Tap for key, hold for layer l (l < 16)
  *   0x4xxx   KM_OS(mod)        One-shot modifier
  *   0x5mxx   KM_HRM(tap, mod)  Tap for key, hold for modifier (m = mod & 7)
+ *   0x60xx   KM_S(kc)          Shifted keycode
  *   0x7xxx   KM_MACRO(id)      Predefined macro
  *   0x8000+  KM_UC(cp)         Unicode codepoint (cp < 0x8000)
  */
@@ -219,17 +219,18 @@ enum keymap_pos {
 #define KM_KIND_TH    0x3000
 #define KM_KIND_OS    0x4000
 #define KM_KIND_HRM   0x5000
+#define KM_KIND_S     0x6000
 #define KM_KIND_MACRO 0x7000
 #define KM_KIND_UC    0x8000
 
 #define KM_KIND(kc) (((kc) & KM_KIND_UC) ? KM_KIND_UC : ((kc) & 0xF000))
 
-#define KM_S(kc)     (0x0100 | (kc))
 #define KM_MO(l)     (KM_KIND_MO | (l))
 #define KM_TG(l)     (KM_KIND_TG | (l))
 #define KM_TH(t, l)  (KM_KIND_TH | ((l) << 8) | (t))
 #define KM_OS(m)     (KM_KIND_OS | (m))
 #define KM_HRM(t, m) (KM_KIND_HRM | (((m) & 0x7) << 8) | (t))
+#define KM_S(kc)     (KM_KIND_S | (kc))
 #define KM_MACRO(id) (KM_KIND_MACRO | (id))
 #define KM_UC(cp)    (KM_KIND_UC | (cp))
 
