@@ -8,7 +8,7 @@
 | Zephyr RTOS | Hardware abstraction via devicetree (no hardcoded pins), built-in drivers for SAADC/GPIO/UART/USB, and the kernel handles threading and power states. |
 | CAF (Common Application Framework) | Event-driven module system from Nordic's nRF Desktop reference. Modules communicate via typed events instead of direct function calls -- keeps things decoupled. |
 | PPI (Programmable Peripheral Interconnect) | nRF52840 hardware automation chains timer -> GPIO (MUX select) -> SAADC -> DMA -> RAM. CPU sleeps during the entire 18-key scan. |
-| C11 | Zephyr defaults to C99; `CONFIG_STD_C11=y` in `firmware/prj.conf` selects C11 to match the host tests (`CMAKE_C_STANDARD 11`) and allow `_Static_assert`. |
+| C11 | Zephyr defaults to C99; `CONFIG_STD_C11=y` in `firmware/prj.conf` selects C11 to match the host tests (`CMAKE_C_STANDARD 11`). |
 
 ## Modules
 
