@@ -28,9 +28,6 @@
 | Module | Runs On | Purpose |
 |--------|---------|---------|
 | HE Scan | Each half | SAADC + MUX scanning, calibration offsets |
-| Rapid Trigger | Central | Per-key actuation detection with direction reversal |
-| Home Row Mod | Central | Depth + time hybrid tap/hold decision |
-| SOCD | Central | Simultaneous opposing key resolution |
 | Keymap | Central | Layers, combos, macros. Consumes the Keymap config tables. |
 | Transport | All | UART (Phase 1) or BLE (Phase 2) between halves |
 | Calibration | Each half | Boot auto-zero, runtime drift compensation |
