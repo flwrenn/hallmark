@@ -77,7 +77,7 @@ export ZEPHYR_BASE=~/.ncs/zephyr
 west build -b supermini_nrf52840/nrf52840/uf2 firmware/ -- -DBOARD_ROOT=$(pwd)
 ```
 
-A successful build produces `build/firmware/zephyr/zephyr.uf2` (~115 KB).
+A successful build produces `build/firmware/zephyr/zephyr.uf2` (~110 KB).
 
 To clean and rebuild:
 
@@ -136,12 +136,16 @@ Press `Ctrl-A` then `Ctrl-\` to exit screen.
 
 ## Board definition
 
-The SuperMini nRF52840 has no upstream Zephyr board definition. A custom HWMv2 board definition lives in `boards/supermini/supermini_nrf52840/` in this repo.
+Hallmark builds against its own HWMv2 board definition in `boards/supermini/supermini_nrf52840/`. The `-DBOARD_ROOT=$(pwd)` flag in the build command tells west where to find it.
+
+Zephyr also ships a board for this hardware, [`promicro_nrf52840`](https://docs.zephyrproject.org/latest/boards/others/promicro_nrf52840/doc/index.html), which names the SuperMini in its documentation. The two differ:
+
+- **Link address.** Under the nRF Connect SDK, sysbuild turns on Partition Manager, which ignores the devicetree code partition and links the app at 0x0. Built with NCS v3.2.1, the upstream UF2 variant links at 0x0 too, while the bootloader loads the image at 0x26000. Ours turns Partition Manager off for the UF2 variant in `Kconfig.sysbuild`, and its `CMakeLists.txt` fails the build if Partition Manager comes back on.
+- **Peripherals.** Upstream enables UART0, I2C0, I2C1, SPI2, and PWM0, and turns the NFC pins (P0.09, P0.10) into GPIOs. Ours enables UART0 in the base variant only, and P0.09 and P0.10 stay NFC pins.
+- **Power.** Ours selects DC/DC mode for REG1 and describes the VCC LDO enable on P0.13.
 
 The board is pin-compatible with Nice!Nano v2. Key differences:
 - LED colors are swapped (red = user LED on P0.15, blue = charger)
 - P0.13 controls the VCC LDO (active high)
 - Uses the Adafruit nRF52 Bootloader with UF2 flashing (flash offset 0x26000)
-- Some batches lack the 32.768 kHz crystal
-
-The `-DBOARD_ROOT=$(pwd)` flag in the build command tells west where to find this custom board definition.
+- Some batches lack the 32.768 kHz crystal. The board selects the crystal as its 32 kHz clock source and waits for it at boot, so for those batches add `-DCONFIG_CLOCK_CONTROL_NRF_K32SRC_RC=y` to the build command.
