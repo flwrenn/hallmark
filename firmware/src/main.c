@@ -11,6 +11,9 @@ LOG_MODULE_REGISTER(hallmark, LOG_LEVEL_INF);
 
 #define BLINK_INTERVAL_MS 500
 
+/* Time for the USB host to enumerate the CDC ACM device, so the first log lines arrive. */
+#define USB_ENUMERATION_DELAY_MS 1000
+
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
 
 int main(void)
@@ -18,8 +21,7 @@ int main(void)
     int ret;
     unsigned int count = 0;
 
-    /* Wait for USB host to enumerate CDC ACM device before logging */
-    k_msleep(1000);
+    k_msleep(USB_ENUMERATION_DELAY_MS);
 
     if (!gpio_is_ready_dt(&led)) {
         LOG_ERR("LED device not ready");

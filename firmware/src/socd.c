@@ -41,12 +41,12 @@ void socd_release_b(struct socd_pair *pair)
     }
 }
 
+/* When both keys are active, the one pressed last wins. */
 struct socd_result socd_resolve(const struct socd_pair *pair)
 {
     struct socd_result r = {false, false};
 
     if (pair->a_active && pair->b_active) {
-        /* Both active -- last input wins. */
         if (pair->last_pressed == SOCD_LAST_A) {
             r.a_output = true;
         } else {
