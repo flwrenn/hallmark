@@ -37,7 +37,10 @@
 		};
 	};
 
-	/* VCC rail control via LDO enable pin */
+	/*
+	 * VCC rail control via the LDO enable pin. No driver binds this node
+	 * until CONFIG_REGULATOR is set, so P0.13 stays at its reset state.
+	 */
 	ext_power {
 		compatible = "regulator-fixed";
 		regulator-name = "ext-power";
