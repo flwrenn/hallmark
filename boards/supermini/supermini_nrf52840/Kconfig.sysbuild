@@ -1,0 +1,5 @@
+# The UF2 variant links at the devicetree code partition (0x26000), above the
+# SoftDevice and below the Adafruit bootloader. Partition Manager ignores the
+# devicetree and places the app at 0x0, so it stays off for this variant.
+config PARTITION_MANAGER
+	default n if BOARD_SUPERMINI_NRF52840_NRF52840_UF2
