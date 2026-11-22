@@ -25,7 +25,9 @@ Wireless Hall Effect 36-key split keyboard. Analog sensing, rapid trigger, depth
 
 ```
 hallmark/
+├── boards/              # Zephyr board definitions (SuperMini nRF52840)
 ├── docs/
+│   ├── setup.md         # Dev environment setup (NCS, toolchain, build, flash)
 │   ├── architecture.md  # System design, components, block diagram
 │   ├── phases.md        # Development phases post-prototyping
 │   ├── firmware.md      # Technology choices and planned modules
@@ -34,6 +36,7 @@ hallmark/
 │   ├── references.md    # Datasheets and links
 │   └── glossary.md      # Acronyms and terms
 ├── firmware/            # Zephyr application (C)
+├── tests/               # Host-native unit tests (Unity, CTest)
 ├── hardware/
 │   ├── pcb/             # PCB design (KiCad)
 │   └── case/            # Case design files
