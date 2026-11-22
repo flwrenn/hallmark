@@ -110,7 +110,7 @@ ls /dev/cu.usbmodem*
 screen /dev/cu.usbmodem14101 115200
 ```
 
-Expected output after ~1 second:
+Expected output, about 4 seconds after reset. The log thread waits that long on the UF2 variant, so the first lines arrive late but keep the timestamp they were logged at:
 
 ```
 [00:00:01.000,000] <inf> hallmark: Hallmark firmware v0.0.1
