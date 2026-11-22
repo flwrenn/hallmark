@@ -12,7 +12,7 @@
 - [Zephyr Board Porting Guide (HWMv2)](https://docs.zephyrproject.org/latest/hardware/porting/board_porting.html)
 - [Nice!Nano v2 Documentation](https://nicekeyboards.com/nice-nano/)
 - [Nice!Nano v2 Pinout](https://nicekeyboards.com/docs/nice-nano/pinout-schematic)
-- [Nice!Nano v2 Zephyr Board Definition](https://github.com/zephyrproject-rtos/zephyr/tree/main/boards/nice_keyboards/nice_nano_v2)
+- [Zephyr Pro Micro nRF52840 Board Definition](https://github.com/zephyrproject-rtos/zephyr/tree/main/boards/others/promicro_nrf52840) (covers Nice!Nano v2 and SuperMini)
 - [Adafruit nRF52 Bootloader](https://github.com/adafruit/Adafruit_nRF52_Bootloader)
 - [Zephyr USB Device Next (new USB stack)](https://docs.zephyrproject.org/latest/connectivity/usb/device_next/usb_device_next.html)
 - [nRF Connect SDK v3.2.1 Release Notes](https://docs.nordicsemi.com/bundle/ncs-3.2.1/page/nrf/releases_and_maturity/releases/release-notes-3.2.1.html)
