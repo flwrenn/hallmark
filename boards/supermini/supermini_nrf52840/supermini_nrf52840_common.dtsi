@@ -30,9 +30,9 @@
 
 	leds {
 		compatible = "gpio-leds";
-		/* Red LED (active low) -- labeled as "blue" on Nice!Nano, colors are swapped on SuperMini */
+		/* Red LED (active high) -- labeled as "blue" on Nice!Nano, colors are swapped on SuperMini */
 		led0: led_0 {
-			gpios = <&gpio0 15 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
 			label = "User LED";
 		};
 	};
