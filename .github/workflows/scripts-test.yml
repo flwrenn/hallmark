@@ -21,7 +21,7 @@ jobs:
           sparse-checkout: .github/scripts
 
       # Node 21+ expands the glob itself; the quoted pattern is the same command
-      # the contributor docs give for running these tests locally.
+      # as the header of project.test.js.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
