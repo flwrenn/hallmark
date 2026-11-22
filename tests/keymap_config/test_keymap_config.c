@@ -80,18 +80,45 @@ void test_hand_sets_partition_all_keys(void)
     }
 }
 
-void test_combos_are_well_formed(void)
+void test_combos_chord_their_named_keys(void)
 {
-    for (size_t i = 0; i < KEYMAP_COMBOS; i++) {
-        const struct keymap_combo *c = &keymap_combos[i];
-        size_t n = 0;
+    static const struct {
+        size_t len;
+        uint16_t keys[KEYMAP_COMBO_MAX_KEYS];
+    } expected[] = {
+            {2, {KC_W, HM_R}},
+            {2, {KC_F, HM_S}},
+            {2, {KC_U, HM_E}},
+            {2, {KC_Y, HM_I}},
+            {2, {HM_R, KC_X}},
+            {2, {HM_S, KC_C}},
+            {2, {HM_T, KC_D}},
+            {2, {HM_N, KC_H}},
+            {2, {HM_E, KC_COMM}},
+            {2, {HM_I, KC_DOT}},
+            {2, {KC_L, HM_N}},
+            {2, {KC_Q, HM_A}},
+            {2, {KC_QUOT, HM_O}},
+            {2, {KC_P, HM_T}},
+            {2, {KC_COMM, KC_DOT}},
+            {2, {KC_DOT, KC_SCLN}},
+            {2, {KC_H, KC_COMM}},
+            {2, {KC_X, KC_C}},
+            {3, {KC_ESC, MO_NAV, KC_SPC}},
+            {3, {KC_ENT, MO_SYM, KC_BSPC}},
+            {2, {KC_ESC, KC_BSPC}},
+            {4, {KC_ESC, MO_NAV, MO_SYM, KC_BSPC}},
+    };
 
-        while (n <= KEYMAP_COMBO_MAX_KEYS && c->positions[n] != POS_NONE) {
-            TEST_ASSERT_LESS_THAN_INT(KEYMAP_KEYS, c->positions[n]);
-            n++;
+    TEST_ASSERT_EQUAL_size_t(KEYMAP_COMBOS, sizeof(expected) / sizeof(expected[0]));
+    for (size_t i = 0; i < KEYMAP_COMBOS; i++) {
+        const enum keymap_pos *pos = keymap_combos[i].positions;
+
+        for (size_t k = 0; k < expected[i].len; k++) {
+            TEST_ASSERT_LESS_THAN_INT(KEYMAP_KEYS, pos[k]);
+            TEST_ASSERT_EQUAL_HEX16(expected[i].keys[k], base_key(pos[k]));
         }
-        TEST_ASSERT_GREATER_OR_EQUAL_size_t(2, n);
-        TEST_ASSERT_LESS_OR_EQUAL_size_t(KEYMAP_COMBO_MAX_KEYS, n);
+        TEST_ASSERT_EQUAL_INT(POS_NONE, pos[expected[i].len]);
     }
 }
 
@@ -221,7 +248,7 @@ int main(void)
     RUN_TEST(test_hrm_table_targets_home_row_keys);
     RUN_TEST(test_hrm_table_splits_evenly_across_hands);
     RUN_TEST(test_hand_sets_partition_all_keys);
-    RUN_TEST(test_combos_are_well_formed);
+    RUN_TEST(test_combos_chord_their_named_keys);
     RUN_TEST(test_socd_pairs_are_opposing_gaming_keys);
     RUN_TEST(test_action_aliases_are_distinct);
     RUN_TEST(test_action_kind_survives_encoding);
