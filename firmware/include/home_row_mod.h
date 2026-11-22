@@ -88,6 +88,9 @@ enum hrm_action hrm_update(struct hrm_key_state *key, uint16_t adc, uint32_t tim
  * Signal that the key has been released.
  *
  * If the action is still PENDING at release, it resolves as TAP.
+ * Elapsed time is not checked here.  A release seen on a scan means the
+ * key came up before that scan's timestamp, so the time threshold is
+ * decided by the last hrm_update() alone.
  *
  * Returns the final resolved action.
  */
