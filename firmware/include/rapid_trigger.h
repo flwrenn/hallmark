@@ -9,6 +9,10 @@
  *   ACTIVE ──reversal up past sensitivity──▸  RELEASING
  *   RELEASING ──reversal down past sensitivity──▸  ACTIVE
  *   ACTIVE / RELEASING ──passes release point──▸  IDLE
+ *
+ * actuation_adc gates only the first press from IDLE.  From RELEASING, a
+ * downward reversal re-presses at any depth above release_adc, including
+ * shallower than actuation_adc.
  */
 
 #ifndef RAPID_TRIGGER_H
