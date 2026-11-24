@@ -37,7 +37,7 @@ Each command prints what to do, waits for Enter, captures, writes a CSV to `tmp/
 | `stage1.py repeat` | Press to the same depth 20 times, holding each (40 s) | Repeatability |
 | `stage1.py all` | All four in order, then one combined table | All of the above |
 
-`--seconds` changes a stream's length, `--rounds` the noise runs, and `--yes` skips the Enter prompt. Stream CSVs have one row per millisecond (`t_ms,raw`), and a `#` line above the header records the app's configuration.
+`--seconds` changes a stream's length, `--rounds` the noise runs, and `--yes` skips the Enter prompt. Stream CSVs have one row per received sample (`t_ms,raw`), where `t_ms` is the app's sample index, so a dropped sample leaves a gap in `t_ms` instead of shifting later rows. A `#` line above the header records the app's configuration.
 
 The script detects which way the output moves on press and works in counts away from rest. A press starts at 50% of the largest travel and ends at 25%. Taps shorter than 5 ms count as chatter. Repeatability compares each press's plateau, the median of its samples within 10% of its peak. Linearity reports the largest reversal on the press stroke, from rest to 98% of travel, against 3 sigma of the rest noise. Dead zones need the travel curve plotted against position, so plot the curve CSV.
 
@@ -56,6 +56,6 @@ Commands are lines ending in CR or LF, so `screen /dev/cu.usbmodem* 115200` work
 
 Any input byte stops a running `noise` or `stream`, and that byte is discarded. A stopped `noise` replies `ERR,noise interrupted after <n> samples`. Errors and unknown commands reply `ERR,<reason>`. Raw values are 12-bit counts, and sigma uses n - 1.
 
-Samples follow an absolute 1 ms schedule. `late` counts samples that started a full period or more after their slot. The script also counts `S` lines missing from the index sequence and warns when either count is not zero.
+Samples follow an absolute 1 ms schedule. `late` counts samples that started a full period or more after their slot. The script also counts `S` lines missing from the index sequence. When either count is not zero, it marks that capture's graded rows `inconclusive`.
 
 With nothing on AIN0, the floating pin reads about 440 mV and rises over the first 15 ms of each capture. A driven sensor output should not show that rise, so treat a start-up transient with the sensor wired as a finding.
