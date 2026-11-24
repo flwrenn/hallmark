@@ -8,7 +8,8 @@
 |-----------|-------|
 | Type | Linear, ratiometric |
 | Output | Analog |
-| Supply | 4.5-5.5V (3.3V works with reduced range) |
+| Supply | 3.0-3.6V ([datasheet](https://www.allegromicro.com/-/media/files/datasheets/a1304-datasheet.pdf) Rev. 4) |
+| Supply current | 7.7 mA typical, 9 mA max, no load on VOUT |
 | Sensitivity | ~5 mV/G |
 | Package | SOT-23 |
 
@@ -32,7 +33,7 @@ One sensor per key (36 total), read through 3x CD74HC4051 multiplexers per half.
 
 ## Design Considerations
 
-- **3.3V supply:** A1304 is spec'd for 4.5-5.5V but operates at 3.3V with reduced output range. Validated during prototyping Stage 1.
+- **3.3V supply:** The A1304 datasheet specifies 3.0-3.6V, so the 3.3V rail is in range. The output is ratiometric, with zero field at VCC/2.
 - **MUX settling:** CD74HC4051 on-resistance ~70 Ohm vs SAADC input impedance ~400k Ohm. Need to measure actual settling time (Stage 2).
 - **Magnetic crosstalk:** At 19.05mm MX pitch, adjacent magnets may interfere. Measured in Stage 2, mitigated with software compensation or mu-metal shielding if needed.
 - **Noise floor:** Determines minimum rapid trigger sensitivity (Stage 1).

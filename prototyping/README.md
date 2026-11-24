@@ -159,7 +159,7 @@ Desk audit, done before the Stage 2 hardware (#21). Sources:
 - LED: the user LED is on-board at P0.15, and the charge LED is wired to the charger. 0 header pins.
 - Power switch: a switch in series with B+ needs no sense pin, and no doc asks for one.
 - Reset and USB: the RST header pin (P0.18, `gpio-as-nreset`) and the USB-C connector's dedicated D+/D-. 0 GPIO.
-- Sensor power, not in the docs: 18 A1304s draw 7.7 mA each (datasheet typical), about 139 mA, or 5 h on the 750 mAh cell. Wireless use will need to switch sensor power. The P0.13 VCC rail can do it with 0 extra pins if sensors and MUXes run from VCC. A separate load switch costs 1 GPIO.
+- Sensor power: 18 A1304s draw about 139 mA typical and 162 mA max (7.7 and 9 mA each, datasheet, no output load). That is about 5.4 h on the 750 mAh cell at typical draw, sensor-only arithmetic rather than a measured runtime. Whichever rail feeds the sensors must hold 3.0-3.6 V at 162 mA; verify it at that load. Wireless use will need to switch sensor power. The P0.13 VCC rail can do it with 0 extra pins if sensors and MUXes run from VCC. A separate load switch costs 1 GPIO.
 
 **Pin assignment.** The same on both halves.
 
