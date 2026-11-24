@@ -10,4 +10,5 @@ target_sources(app PRIVATE
   src/home_row_mod.c
   src/socd.c
   src/keymap_config.c
+  src/packet.c
 )
