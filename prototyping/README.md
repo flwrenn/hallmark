@@ -26,7 +26,7 @@ Validate every risky assumption before PCB fabrication. 6 stages.
 | MUX crosstalk | S2 | 100nF input caps, increase settling time |
 | Magnetic crosstalk | S2 | Software compensation, mu-metal shielding |
 | LLPM on third-party modules | S6 | Fall back to 7.5ms BLE, use Nordic PCA10059 |
-| UART reliability | S3 | Drop to 500kbaud, add CRC-8 |
+| UART reliability | S3 | Drop to 500kbaud, check cable quality |
 | Home row mod misfires | S4 | Per-finger threshold tuning, release confirmation |
 
 ## Stage 1: Single Key ADC
@@ -110,14 +110,14 @@ Space 2-3 switches at 19.05mm center-to-center for crosstalk test.
 [SuperMini #1 - Peripheral] -- TX/RX -- TRRS -- RX/TX -- [SuperMini #2 - Central] -- USB
 ```
 
-**Firmware:** Peripheral scans 6 keys, packs into 14-byte packet (sync + 6x16bit + checksum), sends at 1Mbaud. Central receives, validates, outputs USB HID.
+**Firmware:** Peripheral scans 6 keys, packs into 15-byte packet (sync + half id + 6x16bit + CRC-8), sends at 1Mbaud. Central receives, validates, outputs USB HID.
 
 | Metric | Pass | Fail |
 |--------|------|------|
 | End-to-end latency | <2ms | >5ms |
 | Packet loss | <0.01% | >0.1% |
 
-**If fail:** Drop to 500kbaud, add CRC-8, check cable quality.
+**If fail:** Drop to 500kbaud, check cable quality.
 
 ## Stage 4: Rapid Trigger + Home Row Mods
 
