@@ -88,15 +88,24 @@ west build -b supermini_nrf52840/nrf52840/uf2 firmware/ -- -DBOARD_ROOT=$(pwd)
 
 ## 7. Flash via UF2
 
-1. Connect the SuperMini nRF52840 via USB.
-2. Double-tap the RST button to enter bootloader mode. A USB drive named **NICENANO** appears.
-3. Copy the UF2 file to the drive:
+1. Connect the SuperMini nRF52840 via USB. The first time a board connects, macOS asks whether to allow the accessory. Click **Allow**, or no drive mounts.
+2. Double-tap RST to enter bootloader mode. Most boards have no reset button: RST is the third header pin in the column that starts with B+ (B+, GND, RST, VCC). Short it to the GND pin above it twice within half a second. A USB drive named **NICENANO** appears, and the board enumerates as `nice!nano` (USB `239a:00b3`).
+3. Check the bootloader:
 
-```sh
-cp build/firmware/zephyr/zephyr.uf2 /Volumes/NICENANO/
-```
+   ```sh
+   cat /Volumes/NICENANO/INFO_UF2.TXT
+   ```
 
-The board auto-resets and runs the firmware. The red LED should blink at 1 Hz.
+   It must report `SoftDevice: S140 version 6.1.1`, whose bootloader loads the app at 0x26000. A bootloader built with S140 7.x loads it at 0x27000, and this image will not boot there.
+4. Copy the UF2 file to the drive:
+
+   ```sh
+   cp build/firmware/zephyr/zephyr.uf2 /Volumes/NICENANO/
+   ```
+
+   The board resets as soon as it has the whole image, so `cp` can exit with `could not copy extended attributes ... Device not configured`. The flash still succeeded.
+
+After the reset the board enumerates as `Zephyr Project` (USB `2fe3:0004`) and the red LED blinks at 1 Hz. The blue LED is the charge indicator, and it flickers when no battery is connected.
 
 ## 8. Verify serial output (optional)
 
@@ -113,10 +122,10 @@ screen /dev/cu.usbmodem14101 115200
 Expected output, about 4 seconds after reset. The log thread waits that long on the UF2 variant, so the first lines arrive late but keep the timestamp they were logged at:
 
 ```
-[00:00:01.000,000] <inf> hallmark: Hallmark firmware v0.0.1
-[00:00:01.000,000] <inf> hallmark: Board: SuperMini nRF52840
-[00:00:01.000,000] <inf> hallmark: LED blink started (500 ms interval)
-[00:00:06.000,000] <inf> hallmark: Heartbeat: 10 toggles
+[00:00:01.409,149] <inf> hallmark: Hallmark firmware v0.0.1
+[00:00:01.409,179] <inf> hallmark: Board: SuperMini nRF52840
+[00:00:01.409,179] <inf> hallmark: LED blink started (500 ms interval)
+[00:00:05.909,912] <inf> hallmark: Heartbeat: 10 toggles
 ```
 
 Press `Ctrl-A` then `Ctrl-\` to exit screen.
@@ -133,6 +142,7 @@ Press `Ctrl-A` then `Ctrl-\` to exit screen.
 | Python | 3.14.3 |
 | dtc | 1.7.2 |
 | Host | macOS (Apple Silicon) |
+| Board | micro-nrf ProMicro nRF52840, nice!nano UF2 bootloader 0.6.0, S140 6.1.1 |
 
 ## Board definition
 
