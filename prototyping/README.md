@@ -56,6 +56,28 @@ Validate every risky assumption before PCB fabrication. 6 stages.
 
 **If fail:** Different gain, oversampling 4-8x, different sensor (DRV5055).
 
+### Result: SAADC noise floor without a sensor (2026-11-24)
+
+Measured on a bare micro-nrf ProMicro nRF52840, powered from a Mac over USB. Each run took 1000 samples at 1 kHz, 12-bit, internal reference, gain 1/6. Each figure is the median sigma, in counts, of 5 runs.
+
+| Input | Acquisition | 1x | 4x | 16x |
+|---|---|---|---|---|
+| AIN0 - AIN0, differential (converter alone) | 10 us | 1.55 | 0.88 | 0.55 |
+| AIN0 - AIN0, differential (converter alone) | 3 us | 1.60 | 0.91 | 0.54 |
+| VDD, single-ended | 10 us | 5.2 to 6.7 | 2.7 to 2.9 | 1.4 |
+| VDD, single-ended | 3 us | 4.7 | 2.3 | 1.4 |
+
+Differential counts are twice the size of single-ended counts in volts. The VDD rows varied between sessions, so they show a range.
+
+- **Oversampling.** Sigma falls close to 1/sqrt(N), so the noise is close to white and averaging removes it.
+- **Acquisition time.** 3 us adds no measurable noise on these low-impedance inputs.
+- **Reference.** A VDD/4 reference showed no benefit once scaled to the same signal swing: 4.9 against 5.2 counts at 1x.
+- **Offset.** The differential input reads about -7 counts (-12 mV) with no signal. Run offset calibration at boot (errata 86).
+
+**Implication.** Single samples sit at the 5-count pass line, and 4x oversampling gives 2.3 to 2.9 counts. With a 3 us acquisition, 4x costs about 20 us per key by the datasheet's timing, so 18 keys fit in Stage 2's 500 us budget; with 10 us they do not. At 800 counts per 3.4 mm, 3 sigma at 4x is at most 0.04 mm, so the ADC alone does not limit rapid trigger.
+
+**Not measured.** A1304 noise, the real rest-to-bottom-out range, and settling through the MUX. Stage 1 with a sensor answers the first two, Stage 2 the third.
+
 ## Stage 2: MUX Scan + Magnetic Crosstalk
 
 **Goal:** 6+ keys via MUX, fast and clean. Magnetic crosstalk at 19mm spacing.
