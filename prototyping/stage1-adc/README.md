@@ -53,7 +53,7 @@ Commands are lines ending in CR or LF, so `screen /dev/cu.usbmodem* 115200` work
 |---|---|
 | `info` | One `CHANNEL,name=,resolution=,oversampling=,acq_us=,fullscale_mv=` per channel, then `INFO,app=stage1-adc,rate_hz=,noise_n=,setup_err=,cal_err=` |
 | `noise [ain0\|vdd]` | `NOISE,channel=,n=1000,mean=,sigma=,min=,max=,mean_mv=,late=` after 1000 samples at 1 kHz. Default channel `ain0` |
-| `stream [ms]` | `STREAM_START,channel=ain0,rate_hz=1000,n=`, then `S,<index>,<raw>` per sample, then `STREAM_END,n=,late=`. No duration streams until the next input byte |
+| `stream [ms]` | `STREAM_START,channel=ain0,rate_hz=1000,n=`, then `S,<index>,<raw>` per sample, then `STREAM_END,n=,late=`. No duration streams until the next input byte. A duration that is not a whole number from 1 to 4294967 replies `ERR,bad duration <ms>` |
 | `b` | `BOOTLOADER`, then a reboot into the UF2 bootloader |
 
 Any input byte stops a running `noise` or `stream`, and that byte is discarded. A stopped `noise` replies `ERR,noise interrupted after <n> samples`. Errors and unknown commands reply `ERR,<reason>`. Raw values are 12-bit counts, and sigma uses n - 1.

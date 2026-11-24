@@ -12,6 +12,7 @@
 #include <zephyr/sys/reboot.h>
 #include <zephyr/sys/util.h>
 #include <hal/nrf_power.h>
+#include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +20,7 @@
 #define RATE_HZ                 1000
 #define PERIOD_US               (USEC_PER_SEC / RATE_HZ)
 #define NOISE_SAMPLES           1000
+#define STREAM_MAX_MS           (UINT32_MAX / RATE_HZ)
 #define CMD_LINE_MAX            32
 #define UF2_BOOTLOADER_GPREGRET 0x57
 
@@ -176,12 +178,26 @@ static void cmd_noise(const char *arg)
            mean * fullscale_mv(&ch->spec) / BIT(ch->spec.resolution), run.late);
 }
 
+/*
+ * No argument streams until the next input byte. A given duration must be a
+ * whole number of milliseconds from 1 to STREAM_MAX_MS.
+ */
 static void cmd_stream(const char *arg)
 {
-    uint32_t count = strtoul(arg, NULL, 10) * RATE_HZ / MSEC_PER_SEC;
+    char *end;
+    unsigned long ms = strtoul(arg, &end, 10);
+    uint32_t count = 0;
     const struct channel *ch = &channels[0];
     struct sample_run run;
 
+    if (arg[0] != '\0') {
+        if (!isdigit((unsigned char)arg[0]) || *end != '\0' || ms == 0 || ms > STREAM_MAX_MS) {
+            printk("ERR,bad duration %s; use stream [ms] with ms from 1 to %u\n", arg,
+                   (unsigned int)STREAM_MAX_MS);
+            return;
+        }
+        count = ms * RATE_HZ / MSEC_PER_SEC;
+    }
     printk("STREAM_START,channel=%s,rate_hz=%d,n=%u\n", ch->name, RATE_HZ, count);
     run = sample_at_rate(&ch->spec, count, stream_print, NULL);
     if (run.err) {
