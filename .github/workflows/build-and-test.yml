@@ -76,6 +76,7 @@ jobs:
           arm="toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz"
           wget -q "$base/$minimal" "$base/$arm" "$base/sha256.sum"
           sha256sum --check --ignore-missing sha256.sum
+          apt-get update -qq && apt-get install -y -qq xz-utils
           tar -xf "$minimal" -C "$NCS_DIR"
           tar -xf "$arm" -C "$ZEPHYR_SDK_DIR"
 
