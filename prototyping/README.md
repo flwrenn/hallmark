@@ -58,23 +58,24 @@ Validate every risky assumption before PCB fabrication. 6 stages.
 
 ### Result: SAADC noise floor without a sensor (2026-11-24)
 
-Measured on a bare micro-nrf ProMicro nRF52840, powered from a Mac over USB. Each run took 1000 samples at 1 kHz, 12-bit, internal reference, gain 1/6. Each figure is the median sigma, in counts, of 5 runs.
+Measured on a bare micro-nrf ProMicro nRF52840, powered from a Mac over USB, in three sessions. Each run took 1000 readings at 12-bit, internal reference, gain 1/6, with a 1 ms sleep after each read. Each figure is the median sigma, in counts, of 5 runs; a range spans the medians of the sessions that measured that row.
 
 | Input | Acquisition | 1x | 4x | 16x |
 |---|---|---|---|---|
-| AIN0 - AIN0, differential (converter alone) | 10 us | 1.55 | 0.88 | 0.55 |
-| AIN0 - AIN0, differential (converter alone) | 3 us | 1.60 | 0.91 | 0.54 |
-| VDD, single-ended | 10 us | 5.2 to 6.7 | 2.7 to 2.9 | 1.4 |
-| VDD, single-ended | 3 us | 4.7 | 2.3 | 1.4 |
+| AIN0 - AIN0, differential (converter alone) | 10 us | 1.51 to 1.59 | 0.88 to 0.89 | 0.53 to 0.55 |
+| AIN0 - AIN0, differential (converter alone) | 3 us | 1.57 to 1.60 | 0.89 to 0.91 | 0.53 to 0.54 |
+| VDD, single-ended | 10 us | 5.2 to 7.1 | 2.7 to 3.0 | 1.4 to 1.5 |
+| VDD, single-ended | 3 us | 4.7 | 2.3 to 2.4 | 1.4 |
 
-Differential counts are twice the size of single-ended counts in volts. The VDD rows varied between sessions, so they show a range.
+Differential counts are twice the size of single-ended counts in volts.
 
-- **Oversampling.** Sigma falls close to 1/sqrt(N), so the noise is close to white and averaging removes it.
-- **Acquisition time.** 3 us adds no measurable noise on these low-impedance inputs.
-- **Reference.** A VDD/4 reference showed no benefit once scaled to the same signal swing: 4.9 against 5.2 counts at 1x.
-- **Offset.** The differential input reads about -7 counts (-12 mV) with no signal. Run offset calibration at boot (errata 86).
+- **Drift within a session.** In both sessions that interleaved 10 us and 3 us runs, VDD 1x sigma at 10 us rose from about 5.4 in rounds 1 and 2 to 6.7 to 7.1 in rounds 3 to 5. The 3 us runs in the same rounds stayed at 4.5 to 5.0. The cause is unknown.
+- **Oversampling.** 4x cuts sigma by about 1.7x to 1.8x on the differential input and 1.9x to 2.4x on VDD. 16x helps less than 1/sqrt(N) predicts on the differential input, about 2.9x instead of 4x, as the readings approach the 12-bit quantization floor.
+- **Acquisition time.** On the VDD input, 3 us was no noisier than 10 us. The differential rows cannot show an acquisition effect, because both inputs see the same node.
+- **Reference.** In session 1, a VDD/4 reference read about 5% less noise than the internal reference once scaled to the same signal swing (4.9 against 5.2 counts at 1x). That compares the supply against a reference derived from the same supply, so it does not settle the reference for the A1304.
+- **Offset.** The differential input reads about -7 counts (-12 mV) with no signal. Run offset calibration at boot and after temperature changes.
 
-**Implication.** Single samples sit at the 5-count pass line, and 4x oversampling gives 2.3 to 2.9 counts. With a 3 us acquisition, 4x costs about 20 us per key by the datasheet's timing, so 18 keys fit in Stage 2's 500 us budget; with 10 us they do not. At 800 counts per 3.4 mm, 3 sigma at 4x is at most 0.04 mm, so the ADC alone does not limit rapid trigger.
+**Implication.** Single samples sit around the 5-count pass line, and 4x oversampling gives 2.3 to 3.0 counts. With a 3 us acquisition and about 2 us per conversion, 4x takes about 20 us per key, so 18 keys need about 360 us of conversion time. That leaves about 140 us of Stage 2's 500 us budget for MUX settling and scan overhead, neither of which this test timed. With a 10 us acquisition, conversion alone needs about 864 us. At 800 counts per 3.4 mm, 3 sigma at 4x is at most 0.04 mm, so the ADC alone does not limit rapid trigger on the bench.
 
 **Not measured.** A1304 noise, the real rest-to-bottom-out range, and settling through the MUX. Stage 1 with a sensor answers the first two, Stage 2 the third.
 
