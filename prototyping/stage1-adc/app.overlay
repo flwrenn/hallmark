@@ -1,0 +1,41 @@
+/*
+ * Stage 1 SAADC configuration, chosen from the bare-board noise floor result in
+ * prototyping/README.md: internal 0.6 V reference, gain 1/6 (0 to 3.6 V full
+ * scale), 12-bit, 3 us acquisition, 4x oversampling.
+ *
+ * ain0 reads the A1304 output on P0.02. vdd reads the supply as a reference
+ * for comparison: its noise is the converter plus the supply, with no sensor.
+ */
+
+/ {
+	zephyr,user {
+		io-channels = <&adc 0>, <&adc 1>;
+		io-channel-names = "ain0", "vdd";
+	};
+};
+
+&adc {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@0 {
+		reg = <0>;
+		zephyr,gain = "ADC_GAIN_1_6";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 3)>;
+		zephyr,input-positive = <NRF_SAADC_AIN0>;
+		zephyr,resolution = <12>;
+		/* log2 of the sample count: 2 means 4x */
+		zephyr,oversampling = <2>;
+	};
+
+	channel@1 {
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1_6";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 3)>;
+		zephyr,input-positive = <NRF_SAADC_VDD>;
+		zephyr,resolution = <12>;
+		zephyr,oversampling = <2>;
+	};
+};
