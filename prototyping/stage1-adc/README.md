@@ -32,7 +32,7 @@ Each command prints what to do, waits for Enter, captures, writes a CSV to `tmp/
 | Command | What you do | Stage 1 rows it answers |
 |---|---|---|
 | `stage1.py noise` | Hands off. Runs 1000 samples 5 times on AIN0, then on VDD | Rest ADC value, Noise sigma at rest |
-| `stage1.py curve` | Press slowly to bottom-out, hold, release (10 s) | Bottom-out ADC value, Usable ADC range, Linearity |
+| `stage1.py curve` | Press slowly to bottom-out, reach it at least 1 s before the end, and stay there until the capture ends; do not release (10 s) | Bottom-out ADC value, Usable ADC range, Linearity |
 | `stage1.py taps` | Tap rapidly 50 times (20 s) | Rapid tap x50 |
 | `stage1.py repeat` | Press to the same depth 20 times, holding each (40 s) | Repeatability |
 | `stage1.py all` | All four in order, then one combined table | All of the above |
@@ -41,7 +41,15 @@ Each command prints what to do, waits for Enter, captures, writes a CSV to `tmp/
 
 The script detects which way the output moves on press and works in counts away from rest. A press starts at 50% of the largest travel and ends at 25%. Taps shorter than 5 ms count as chatter, and the tap row passes only on exactly 50 taps. Repeatability compares each press's plateau, the median of its samples within 10% of its peak, and is graded only when exactly 20 presses are found; any other count is `inconclusive`, since a press shallower than half the deepest one goes undetected.
 
-The curve takes bottom-out from the hold: the deepest stretch of at least 500 ms that stays within the larger of 6 sigma and 3% of travel. Usable range is that hold's depth. Linearity reports the largest reversal on the approach to the hold, from the last sample under 5% of its depth, against 3 sigma of the rest noise, so an overshoot that falls back to the hold fails. Without a hold, range and linearity read `check plot`. A monotonic approach also reads `check plot`, because dead zones need the travel curve plotted against position, so plot the curve CSV.
+The curve protocol fixes both endpoints, so the script grades them without searching the trace. Rest is the median of the first 500 ms and bottom-out the median of the last 500 ms. The rest sigma comes from successive differences in the first 500 ms, which a slow drift does not inflate. Each curve row means:
+
+- **Bottom-out ADC value:** the median of the last 500 ms.
+- **Usable ADC range:** the distance from rest to bottom-out, graded against the Stage 1 table. The direction from rest to bottom-out is the press direction.
+- **Linearity:** the largest drop against the press direction anywhere in the capture, on a 20 ms moving average, compared with 3 sigma of the rest noise. A larger drop fails and names the ms where it starts and ends, so an overshoot that falls back to bottom-out fails. Otherwise it reads `check plot`, because dead zones need the travel curve plotted against position, so plot the curve CSV.
+
+The 20 ms average keeps noise alone under 3 sigma across a whole capture; in simulated white noise the largest such reversal reached 0.62 of the limit. Any reversal that lasts 20 ms or longer still shows at full size.
+
+Range and linearity read `inconclusive` when either end has not settled, meaning the first or last 500 ms spans more than the larger of 10 sigma and 10 counts. 500 samples of white noise span about 6 sigma. The 10-count floor stops a quiet input, whose sigma is under 1 count, from tripping on single-count quantization steps. A window that passes has a median within half its spread of the endpoint. They also read `inconclusive` when bottom-out lies within that same limit of rest, which is what a release before the end looks like.
 
 Feed the noise sigma and the usable range into the resolution and minimum rapid trigger calculation (issue #17).
 
