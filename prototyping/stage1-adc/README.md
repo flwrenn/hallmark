@@ -45,7 +45,7 @@ The curve protocol fixes both endpoints, so the script grades them without searc
 
 - **Bottom-out ADC value:** the median of the last 500 ms.
 - **Usable ADC range:** the distance from rest to bottom-out, graded against the Stage 1 table. The direction from rest to bottom-out is the press direction.
-- **Linearity:** the largest drop against the press direction anywhere in the capture, on a 20 ms moving average, compared with 3 sigma of the rest noise. A larger drop fails and names the ms where it starts and ends, so an overshoot that falls back to bottom-out fails. Otherwise it reads `check plot`, because dead zones need the travel curve plotted against position, so plot the curve CSV.
+- **Linearity:** the largest drop against the press direction anywhere in the capture, on a 20 ms moving average, compared with the larger of 3 sigma of the rest noise and 3 counts. A larger drop fails and names the ms where it starts and ends, so an overshoot that falls back to bottom-out fails. Otherwise it reads `check plot`, because dead zones need the travel curve plotted against position, so plot the curve CSV.
 
 The 20 ms average keeps noise alone under 3 sigma across a whole capture; in simulated white noise the largest such reversal reached 0.62 of the limit. A reversal shows at full size only when both its peak and its trough hold flat for 20 ms or longer; anything faster, such as a slow ramp back and forth, can be attenuated below the limit, so plot the CSV. The limit never drops below 3 counts, so 1-2 count quantization steps at rest are not reversals.
 
