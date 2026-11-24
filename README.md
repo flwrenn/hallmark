@@ -41,6 +41,7 @@ hallmark/
 │   ├── pcb/             # PCB design (KiCad)
 │   └── case/            # Case design files
 ├── prototyping/         # 6-stage breadboard validation plan
+│   └── stage1-adc/      # Stage 1 SAADC measurement app and host script
 └── images/              # Photos, renders, diagrams
 ```
 

@@ -37,7 +37,7 @@ Validate every risky assumption before PCB fabrication. 6 stages.
 [SuperMini] -- 3.3V/GND/AIN0 -- [A1304 on adapter] <- under [Owlab Ti HE]
 ```
 
-**Firmware:** SAADC channel 0, 12-bit, 1/6 gain, 1kHz sampling. Print ADC values over USB serial. ~50 lines Zephyr.
+**Firmware:** [stage1-adc/](stage1-adc/) samples AIN0 at 1 kHz over USB serial (12-bit, 1/6 gain, 4x oversampling). Its `stage1.py` captures each measurement below and prints the pass/fail table.
 
 **Measure:**
 1. Rest ADC value (zero-point)
