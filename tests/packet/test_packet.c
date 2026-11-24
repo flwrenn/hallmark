@@ -297,11 +297,9 @@ int main(void)
 {
     UNITY_BEGIN();
 
-    /* CRC */
     RUN_TEST(test_crc8_known_answer);
     RUN_TEST(test_crc8_of_nothing_is_zero);
 
-    /* Pack and unpack */
     RUN_TEST(test_pack_layout);
     RUN_TEST(test_round_trip_left);
     RUN_TEST(test_round_trip_right);
@@ -311,7 +309,6 @@ int main(void)
     RUN_TEST(test_unknown_half_rejected_even_with_valid_crc);
     RUN_TEST(test_unpack_leaves_frame_untouched_on_error);
 
-    /* Byte-stream parser */
     RUN_TEST(test_parser_single_packet);
     RUN_TEST(test_parser_back_to_back_packets);
     RUN_TEST(test_parser_truncated_packet_yields_nothing);

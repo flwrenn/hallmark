@@ -33,7 +33,8 @@
 
 _Static_assert(PKT_SIZE == 1 + 1 + 2 * PKT_KEY_COUNT + 1,
                "PKT_SIZE must equal sync + half id + positions + CRC");
-_Static_assert(PKT_SIZE * 8 <= 120, "CRC-8/SMBUS detects all 3-bit errors only up to 120 bits");
+_Static_assert(PKT_SIZE * 8 <= 120,
+               "CRC-8/SMBUS guarantees detection of all 1-3 bit errors only up to 15 bytes");
 
 /* ---------------------------------------------------------------------
  * Types
@@ -111,7 +112,9 @@ void pkt_parser_init(struct pkt_parser *parser);
  * Returns PKT_PARSE_FRAME and writes *frame when the byte completes a
  * valid packet.  Returns PKT_PARSE_REJECTED when it completes a candidate
  * that fails validation; the parser then resumes from the next sync byte
- * inside the rejected candidate, so a false sync costs no real packet.
+ * inside the rejected candidate. A false candidate that happens to pass
+ * validation (about 1 in 256 for random bytes) is reported as a frame and
+ * can consume the real packet that follows it.
  * Bytes before a sync byte are skipped and return PKT_PARSE_PENDING.
  */
 enum pkt_parse_result pkt_parser_feed(struct pkt_parser *parser, uint8_t byte,
