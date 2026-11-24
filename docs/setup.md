@@ -96,7 +96,7 @@ west build -b supermini_nrf52840/nrf52840/uf2 firmware/ -- -DBOARD_ROOT=$(pwd)
    cat /Volumes/NICENANO/INFO_UF2.TXT
    ```
 
-   Its `SoftDevice:` line must name S140 6.1.1, whose bootloader loads the app at 0x26000. Bootloader 0.6.0 prints `S140 version 6.1.1`, and 0.6.3 and later print `S140 6.1.1`. A bootloader built with S140 7.x loads it at 0x27000, and this image will not boot there.
+   Its `SoftDevice:` line must name S140 6.1.1, whose bootloader loads the app at 0x26000. Bootloaders up to 0.6.2 print `S140 version 6.1.1`, and 0.6.3 and later print `S140 6.1.1`. A bootloader built with S140 7.x loads it at 0x27000, and this image will not boot there.
 4. Copy the UF2 file to the drive:
 
    ```sh
