@@ -1,0 +1,93 @@
+name: Build and test
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  host-tests:
+    name: Host tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: cmake -B build/tests tests/
+      - run: cmake --build build/tests
+      - run: ctest --test-dir build/tests --output-on-failure
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned so CI and a local clang-format of the same version agree byte for byte.
+      - run: pipx install clang-format==23.1.5
+
+      - run: git ls-files -z '*.c' '*.h' | xargs -0 clang-format --dry-run --Werror
+
+  firmware:
+    name: Firmware build
+    runs-on: ubuntu-24.04
+    container: ghcr.io/nrfconnect/sdk-nrf-toolchain:v3.2.1
+    env:
+      NCS_VERSION: v3.2.1
+      NCS_DIR: /ncs
+      ZEPHYR_BASE: /ncs/zephyr
+    defaults:
+      run:
+        # The image loads the toolchain environment only in bash.
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore west workspace
+        id: ncs-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /ncs
+          key: ncs-${{ env.NCS_VERSION }}-v1
+
+      - name: Fetch west workspace
+        if: steps.ncs-cache.outputs.cache-hit != 'true'
+        run: |
+          west init -m https://github.com/nrfconnect/sdk-nrf --mr "$NCS_VERSION" "$NCS_DIR"
+          cd "$NCS_DIR"
+          west update --narrow -o=--depth=1
+
+      - name: Save west workspace
+        if: steps.ncs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /ncs
+          key: ${{ steps.ncs-cache.outputs.cache-primary-key }}
+
+      - name: Toolchain versions
+        run: |
+          git config --global --add safe.directory '*'
+          west --version
+          echo "Zephyr SDK required: $(cat "$ZEPHYR_BASE/SDK_VERSION")"
+          echo "Zephyr SDK installed: $(cat "${ZEPHYR_SDK_INSTALL_DIR:-}/sdk_version" || echo unknown)"
+
+      - name: Build supermini_nrf52840/nrf52840/uf2
+        working-directory: /ncs
+        run: >-
+          west build -p always -d "$GITHUB_WORKSPACE/build/uf2"
+          -b supermini_nrf52840/nrf52840/uf2 "$GITHUB_WORKSPACE/firmware"
+          -- -DBOARD_ROOT="$GITHUB_WORKSPACE"
+
+      - name: Build supermini_nrf52840/nrf52840
+        working-directory: /ncs
+        run: >-
+          west build -p always -d "$GITHUB_WORKSPACE/build/plain"
+          -b supermini_nrf52840/nrf52840 "$GITHUB_WORKSPACE/firmware"
+          -- -DBOARD_ROOT="$GITHUB_WORKSPACE"
