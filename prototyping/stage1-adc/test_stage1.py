@@ -128,6 +128,16 @@ class Curve(unittest.TestCase):
         self.assertLessEqual(abs(self.bottom(c) - 1505), 5)
         self.assertEqual(c.result("Usable ADC range"), "PASS")
 
+    def test_one_count_step_at_rest_is_not_a_reversal(self):
+        trace = flat(1001, 250) + flat(1000, 750) + ramp(1000, 1600, 1000) + flat(1600, 1000)
+        c = Capture(stage1.measure_curve, [round(v) for v in trace])
+        self.assertEqual(c.result("Linearity"), "check plot")
+
+    def test_two_count_drift_at_rest_is_not_a_reversal(self):
+        trace = flat(1002, 300) + flat(1001, 300) + flat(1000, 400) + ramp(1000, 1600, 1000)
+        c = Capture(stage1.measure_curve, [round(v) for v in trace + flat(1600, 1000)])
+        self.assertEqual(c.result("Linearity"), "check plot")
+
     def test_clean_stroke_grades_range_and_leaves_dead_zones_to_the_plot(self):
         trace = stroke((1200, 1500), rest=2000) + flat(1200, 1000)
         c = Capture(stage1.measure_curve, noisy(trace))

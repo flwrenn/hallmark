@@ -32,6 +32,8 @@ CURVE_SMOOTH_MS = 20
 SETTLE_MS = 500
 SETTLE_SIGMAS = 10
 SETTLE_FLOOR_COUNTS = 10
+# 1-2 count steps at rest are quantization or drift, not a reversal of the stroke.
+REVERSAL_FLOOR_COUNTS = 3
 REPEAT_PRESSES = 20
 MIN_TRAVEL_COUNTS = 50
 
@@ -358,31 +360,32 @@ def grade_curve(raw):
     head, tail = raw[:SETTLE_MS], raw[-SETTLE_MS:]
     rest, bottom = statistics.median(head), statistics.median(tail)
     sigma = diff_sigma(head)
-    limit = 3 * sigma
+    limit = max(3 * sigma, REVERSAL_FLOOR_COUNTS)
     settle = max(SETTLE_SIGMAS * sigma, SETTLE_FLOOR_COUNTS)
     sign = 1 if bottom >= rest else -1
     span = abs(bottom - rest)
-    print(f"  rest {rest:.1f}, bottom-out {bottom:.1f}, rest sigma {sigma:.2f}, output moves "
-          f"{'up' if sign > 0 else 'down'} on press")
+    print(f"  rest {rest:.1f}, bottom-out {bottom:.1f}, rest sigma {sigma:.2f}")
     problem = unsettled_end(head, tail, settle)
     if problem is None and span <= settle:
-        problem = f"bottom-out reads rest ({span:.0f} counts apart); hold it until the end"
+        problem = (f"rest and bottom-out are indistinguishable ({span:.1f} counts apart, "
+                   f"settle limit {settle:.0f})")
     if problem:
         return [
             Row("Bottom-out ADC value", problem, "-", "-", "-"),
             Row("Usable ADC range", problem, ">500 counts", "<200", "inconclusive"),
             Row("Linearity", problem, "Monotonic", "Dead zones", "inconclusive"),
         ]
+    print(f"  output moves {'up' if sign > 0 else 'down'} on press")
     warm = CURVE_SMOOTH_MS - 1
     depth = [sign * (x - rest) for x in moving_average(raw, CURVE_SMOOTH_MS)[warm:]]
     reversal, (top_at, low_at) = largest_reversal(depth)
     where = f" from {top_at + warm} ms to {low_at + warm} ms" if reversal > limit else ""
     return [
         Row("Bottom-out ADC value", f"{bottom:.0f} counts", "-", "-", "-"),
-        Row("Usable ADC range", f"{span:.0f} counts", ">500 counts", "<200",
+        Row("Usable ADC range", f"{span:.1f} counts", ">500 counts", "<200",
             grade(span, lambda v: v > 500, lambda v: v < 200)),
         Row("Linearity", f"largest reversal {reversal:.1f} counts{where} (3 sigma = "
-                         f"{limit:.1f}); dead zones need the CSV plotted",
+                         f"{limit:.1f}, floor {REVERSAL_FLOOR_COUNTS}); dead zones need the CSV plotted",
             "Monotonic", "Dead zones", "FAIL" if reversal > limit else "check plot"),
     ]
 
