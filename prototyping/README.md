@@ -222,7 +222,7 @@ That leaves 8 spare header pins as the board stands, or 13 with the center pads 
 6. D5 (P0.24) carries the divider footprint. The teardowns report it unpopulated. Check a board before relying on D5.
 7. Wiring 3.3 V MUXes straight to the pins assumes the nRF's own VDD is 3.3 V. Powered through VDDH, the nRF sets VDD, and with it the GPIO high level and the highest voltage a pin or SAADC input may see, from UICR REGOUT0, which defaults to 1.8 V when the UICR is erased. The nice!nano bootloader writes 3.3 V there (Adafruit bootloader 0.6.2, `UICR_REGOUT0_VALUE` in `src/boards/nice_nano/board.h`). Our board files configure only REG1, not REGOUT0. On a base-variant (J-Link) board, measure VDD, not only the header VCC, before connecting the MUX.
 
-**Verdict.** The SuperMini is enough for one half, and a bare nRF52840 is not needed. Against the finding table it has 3 usable AIN, which is neither >=4 nor <3, and 13 free GPIO against 5 needed. The fourth AIN in the need list was the battery, and VDDH reads the battery without a pin, so 3 AIN cover the design. There is no analog margin: the verdict holds only while a half needs 3 analog inputs.
+**Verdict.** On paper, the proposed pinout for one half fits the SuperMini with eight default header spares. Against the finding table it has 3 usable AIN, which is neither >=4 nor <3, and 5 GPIO used. Reclaiming the center pads and NFC pins would raise the spares to 13. The fourth AIN in the need list was the battery, and VDDH reads the battery without a pin, so 3 AIN cover the design. There is no analog margin: the fit holds only while a half needs 3 analog inputs. The board decision stays with #37.
 
 **Unconfirmed until Stage 2 (#21)**
 
