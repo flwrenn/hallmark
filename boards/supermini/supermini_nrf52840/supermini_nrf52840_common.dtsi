@@ -15,8 +15,8 @@
  *
  * D10 and D16 stay NFC pins: &uicr does not set nfct-pins-as-gpios.
  *
- * Back side pads:
- *   P0.04 (AIN2)          P0.26
+ * Pads between the header rows (no analog input):
+ *   P1.01                 P1.02                 P1.07
  *
  * P0.13 = VCC LDO enable (GPIO_ACTIVE_HIGH on v2/SuperMini)
  */
