@@ -192,7 +192,7 @@ That leaves 8 spare header pins as the board stands, or 13 with the center pads 
 **Conflicts**
 
 1. No analog headroom. The header has exactly 3 AIN pins and all 3 carry MUX outputs. A fourth analog input (a battery divider, a fourth MUX, a thermistor) does not fit. The fallback without a bare chip: tie the three MUX outputs to one AIN and select a MUX with its E pin, using 3 spare GPIO. That frees 2 AIN but serializes all 18 conversions, which must still fit Stage 2's 500us budget.
-2. UART0 on P0.06/P0.08 is the console in the base (J-Link) variant. The TRRS link takes UARTE1 on the same pins, or the base variant moves its console to RTT. The UF2 variant logs over USB CDC ACM and leaves UART0 off.
+2. UART0 on P0.06/P0.08 is the console in the base (J-Link) variant (`supermini_nrf52840.dts`). The PS allows only one peripheral per GPIO, so moving the TRRS link to UARTE1 on the same pins does not help while the console holds them. Either move the base variant's console to RTT and give UART0 to the TRRS link, or put one UART on another pin pair from the unrestricted spares (D5, D6, D7). The 10 kHz pins are too slow for a UART while the radio runs. The UF2 variant logs over USB CDC ACM and leaves UART0 off.
 3. D10 and D16 are NFC pins until `nfct-pins-as-gpios` is set.
 4. The board owns P0.13 (VCC rail) and P0.15 (LED). Neither is a header pin.
 5. ZMK's `D18/A0`-style names are Arduino labels, not nRF channels. A0 is P1.15 and A6 is P0.22, and neither is analog. Only D19, D20, and D21 carry AIN.
