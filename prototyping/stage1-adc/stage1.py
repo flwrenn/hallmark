@@ -384,8 +384,8 @@ def grade_curve(raw):
         Row("Bottom-out ADC value", f"{bottom:.0f} counts", "-", "-", "-"),
         Row("Usable ADC range", f"{span:.1f} counts", ">500 counts", "<200",
             grade(span, lambda v: v > 500, lambda v: v < 200)),
-        Row("Linearity", f"largest reversal {reversal:.1f} counts{where} (3 sigma = "
-                         f"{limit:.1f}, floor {REVERSAL_FLOOR_COUNTS}); dead zones need the CSV plotted",
+        Row("Linearity", f"largest reversal {reversal:.1f} counts{where} (limit {limit:.1f} = "
+                         f"max(3 sigma {3 * sigma:.1f}, floor {REVERSAL_FLOOR_COUNTS})); dead zones need the CSV plotted",
             "Monotonic", "Dead zones", "FAIL" if reversal > limit else "check plot"),
     ]
 
