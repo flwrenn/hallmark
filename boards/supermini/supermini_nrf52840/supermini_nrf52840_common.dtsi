@@ -8,10 +8,12 @@
  *   D4  = P0.22           D5  = P0.24
  *   D6  = P1.00           D7  = P0.11
  *   D8  = P1.04           D9  = P1.06
- *   D10 = P0.09           D16 = P0.10
+ *   D10 = P0.09 (NFC1)    D16 = P0.10 (NFC2)
  *   D14 = P1.11           D15 = P1.13
  *   D18 = P1.15           D19 = P0.02 (AIN0)
  *   D20 = P0.29 (AIN5)    D21 = P0.31 (AIN7)
+ *
+ * D10 and D16 stay NFC pins: &uicr does not set nfct-pins-as-gpios.
  *
  * Back side pads:
  *   P0.04 (AIN2)          P0.26
