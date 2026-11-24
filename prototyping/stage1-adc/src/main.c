@@ -59,6 +59,26 @@ static const struct device *const console = DEVICE_DT_GET(DT_CHOSEN(zephyr_conso
 static int setup_err;
 static int cal_err;
 
+/*
+ * Polls one input byte. Returns 0 with the byte in c, or -1 when none is
+ * waiting. An LF right after a CR belongs to that CR's line terminator, so it
+ * is consumed here and neither ends an empty line nor stops a sampler.
+ */
+static int console_read(unsigned char *c)
+{
+    static bool after_cr;
+    bool paired_lf;
+
+    do {
+        if (uart_poll_in(console, c) != 0) {
+            return -1;
+        }
+        paired_lf = after_cr && *c == '\n';
+        after_cr = *c == '\r';
+    } while (paired_lf);
+    return 0;
+}
+
 static const struct channel *find_channel(const char *name)
 {
     for (size_t i = 0; i < ARRAY_SIZE(channels); i++) {
@@ -89,7 +109,7 @@ static struct sample_run sample_at_rate(const struct adc_dt_spec *spec, uint32_t
         return run;
     }
     slot_us = k_ticks_to_us_floor64(k_uptime_ticks());
-    while ((count == 0 || run.n < count) && uart_poll_in(console, &c) != 0) {
+    while ((count == 0 || run.n < count) && console_read(&c) != 0) {
         k_sleep(K_TIMEOUT_ABS_US(slot_us));
         if (k_ticks_to_us_floor64(k_uptime_ticks()) >= slot_us + PERIOD_US) {
             run.late++;
@@ -251,7 +271,7 @@ static int read_line(char *buf, size_t size)
     unsigned char c;
 
     for (;;) {
-        if (uart_poll_in(console, &c) != 0) {
+        if (console_read(&c) != 0) {
             k_msleep(5);
             continue;
         }

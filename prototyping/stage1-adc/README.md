@@ -47,7 +47,7 @@ Feed the noise sigma and the usable range into the resolution and minimum rapid 
 
 ## Serial protocol
 
-Commands are lines ending in CR or LF, so `screen /dev/cu.usbmodem* 115200` works by hand. Replies are lines whose first comma-separated field is a tag.
+Commands are lines ending in CR, LF, or CR LF, so `screen /dev/cu.usbmodem* 115200` works by hand. Replies are lines whose first comma-separated field is a tag.
 
 | Command | Reply |
 |---|---|
@@ -56,7 +56,7 @@ Commands are lines ending in CR or LF, so `screen /dev/cu.usbmodem* 115200` work
 | `stream [ms]` | `STREAM_START,channel=ain0,rate_hz=1000,n=`, then `S,<index>,<raw>` per sample, then `STREAM_END,n=,late=`. No duration streams until the next input byte. A duration that is not a whole number from 1 to 4294967 replies `ERR,bad duration <ms>` |
 | `b` | `BOOTLOADER`, then a reboot into the UF2 bootloader |
 
-Any input byte stops a running `noise` or `stream`, and that byte is discarded. A stopped `noise` replies `ERR,noise interrupted after <n> samples`. Errors and unknown commands reply `ERR,<reason>`. Raw values are 12-bit counts, and sigma uses n - 1.
+Any input byte stops a running `noise` or `stream`, and that byte is discarded. An LF right after a CR is part of that CR's terminator, so it neither stops a capture nor counts as a byte. A stopped `noise` replies `ERR,noise interrupted after <n> samples`. Errors and unknown commands reply `ERR,<reason>`. Raw values are 12-bit counts, and sigma uses n - 1.
 
 Samples follow an absolute 1 ms schedule. `late` counts samples that started a full period or more after their slot. The script also counts `S` lines missing from the index sequence. When either count is not zero, it marks that capture's graded rows `inconclusive`.
 
