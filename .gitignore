@@ -4,3 +4,4 @@
 # Project
 build/
 tmp/
+__pycache__/
