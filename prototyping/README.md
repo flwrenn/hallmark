@@ -61,10 +61,12 @@ Validate every risky assumption before PCB fabrication. 6 stages.
 **Goal:** 6+ keys via MUX, fast and clean. Magnetic crosstalk at 19mm spacing.
 
 ```
-[SuperMini] -- AIN0 <- MUX output
-            -- P0.13/14/15 -> MUX S0/S1/S2 (shared address)
+[SuperMini] -- AIN0 (P0.02, pin D19) <- MUX output
+            -- P0.17/20/22 (pins D2/D3/D4) -> MUX S0/S1/S2 (shared address)
 [CD74HC4051M96 on adapter] -- CH0-CH5 <- 6x A1304 under 6x switches
 ```
+
+Keep P0.13 and P0.15 off the MUX: P0.13 switches the VCC LDO and P0.15 drives the user LED.
 
 Space 2-3 switches at 19.05mm center-to-center for crosstalk test.
 
