@@ -39,7 +39,9 @@ Each command prints what to do, waits for Enter, captures, writes a CSV to `tmp/
 
 `--seconds` changes a stream's length, `--rounds` the noise runs, and `--yes` skips the Enter prompt. Stream CSVs have one row per received sample (`t_ms,raw`), where `t_ms` is the app's sample index, so a dropped sample leaves a gap in `t_ms` instead of shifting later rows. A `#` line above the header records the app's configuration.
 
-The script detects which way the output moves on press and works in counts away from rest. A press starts at 50% of the largest travel and ends at 25%. Taps shorter than 5 ms count as chatter. Repeatability compares each press's plateau, the median of its samples within 10% of its peak. Linearity reports the largest reversal on the press stroke, from rest to 98% of travel, against 3 sigma of the rest noise. Dead zones need the travel curve plotted against position, so plot the curve CSV.
+The script detects which way the output moves on press and works in counts away from rest. A press starts at 50% of the largest travel and ends at 25%. Taps shorter than 5 ms count as chatter, and the tap row passes only on exactly 50 taps. Repeatability compares each press's plateau, the median of its samples within 10% of its peak, and is graded only when exactly 20 presses are found; any other count is `inconclusive`, since a press shallower than half the deepest one goes undetected.
+
+The curve takes bottom-out from the hold: the deepest stretch of at least 500 ms that stays within the larger of 6 sigma and 3% of travel. Usable range is that hold's depth. Linearity reports the largest reversal on the approach to the hold, from the last sample under 5% of its depth, against 3 sigma of the rest noise, so an overshoot that falls back to the hold fails. Without a hold, range and linearity read `check plot`. A monotonic approach also reads `check plot`, because dead zones need the travel curve plotted against position, so plot the curve CSV.
 
 Feed the noise sigma and the usable range into the resolution and minimum rapid trigger calculation (issue #17).
 
