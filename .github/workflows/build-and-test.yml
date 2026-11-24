@@ -58,7 +58,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: /ncs
-          key: ncs-${{ env.NCS_VERSION }}-sdk-${{ env.ZEPHYR_SDK_VERSION }}-v1
+          key: ncs-${{ env.NCS_VERSION }}-sdk-${{ env.ZEPHYR_SDK_VERSION }}-v2
 
       - name: Fetch west workspace
         if: steps.ncs-cache.outputs.cache-hit != 'true'
@@ -74,11 +74,24 @@ jobs:
           base="https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v$ZEPHYR_SDK_VERSION"
           minimal="zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.xz"
           arm="toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz"
-          wget -q "$base/$minimal" "$base/$arm" "$base/sha256.sum"
-          sha256sum --check --ignore-missing sha256.sum
+          wget -q "$base/$minimal" "$base/$arm"
+          printf '%s  %s\n' \
+            a7258bf50c892c4669712b2aacdfcd5e303245bcf36cb458a296039a664594f5 "$minimal" \
+            1b61084fe12076a3639aa2d028b5258f41eb3d0f7d46a16264949e1d213f1915 "$arm" \
+            | sha256sum --check --strict
           apt-get update -qq && apt-get install -y -qq xz-utils
           tar -xf "$minimal" -C "$NCS_DIR"
           tar -xf "$arm" -C "$ZEPHYR_SDK_DIR"
+
+      - name: Check Zephyr SDK version
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory '/ncs/*'
+          west --version
+          required=$(cat "$ZEPHYR_BASE/SDK_VERSION")
+          installed=$(cat "$ZEPHYR_SDK_DIR/sdk_version")
+          echo "Zephyr SDK required by Zephyr: $required, installed: $installed"
+          test "$installed" = "$required"
 
       - name: Save west workspace and Zephyr SDK
         if: steps.ncs-cache.outputs.cache-hit != 'true'
@@ -86,15 +99,6 @@ jobs:
         with:
           path: /ncs
           key: ${{ steps.ncs-cache.outputs.cache-primary-key }}
-
-      - name: Check Zephyr SDK version
-        run: |
-          git config --global --add safe.directory '*'
-          west --version
-          required=$(cat "$ZEPHYR_BASE/SDK_VERSION")
-          installed=$(cat "$ZEPHYR_SDK_DIR/sdk_version")
-          echo "Zephyr SDK required by Zephyr: $required, installed: $installed"
-          test "$installed" = "$required"
 
       - name: Build supermini_nrf52840/nrf52840/uf2
         working-directory: /ncs

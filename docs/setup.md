@@ -144,7 +144,7 @@ Press `Ctrl-A` then `Ctrl-\` to exit screen.
 | Host | macOS (Apple Silicon) |
 | Board | micro-nrf ProMicro nRF52840, nice!nano UF2 bootloader 0.6.0, S140 6.1.1 |
 
-CI (`.github/workflows/build-and-test.yml`) builds both board variants in Nordic's `sdk-nrf-toolchain` container for the same nRF Connect SDK tag and Zephyr SDK, runs the host tests, and checks formatting with clang-format 23.1.5. Bump the workflow's versions when this table changes.
+CI (`.github/workflows/build-and-test.yml`) builds both board variants in Nordic's `sdk-nrf-toolchain` container for the same nRF Connect SDK tag and Zephyr SDK, runs the host tests, and checks formatting with clang-format 23.1.5. Bump the workflow's versions, and its pinned Zephyr SDK checksums, when this table changes.
 
 ## Board definition
 
