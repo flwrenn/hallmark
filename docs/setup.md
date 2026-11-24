@@ -88,8 +88,8 @@ west build -b supermini_nrf52840/nrf52840/uf2 firmware/ -- -DBOARD_ROOT=$(pwd)
 
 ## 7. Flash via UF2
 
-1. Connect the SuperMini nRF52840 via USB. The first time a board connects, macOS asks whether to allow the accessory. Click **Allow**, or no drive mounts.
-2. Double-tap RST to enter bootloader mode. Most boards have no reset button: RST is the third header pin in the column that starts with B+ (B+, GND, RST, VCC). Short it to the GND pin above it twice within half a second. A USB drive named **NICENANO** appears, and the board enumerates as `nice!nano` (USB `239a:00b3`).
+1. Connect the SuperMini nRF52840 via USB. If macOS asks whether to allow the accessory, click **Allow**, or no drive mounts. The bootloader and the flashed app are separate USB devices, so it may ask again after flashing.
+2. Double-tap RST to enter bootloader mode. If the board has no reset button, RST is the third header pin in the column that starts with B+ (B+, GND, RST, VCC). Short it to the GND pin above it twice within half a second. A USB drive named **NICENANO** appears, and the board enumerates as `nice!nano` (USB `239a:00b3`).
 3. Check the bootloader:
 
    ```sh
@@ -103,9 +103,9 @@ west build -b supermini_nrf52840/nrf52840/uf2 firmware/ -- -DBOARD_ROOT=$(pwd)
    cp build/firmware/zephyr/zephyr.uf2 /Volumes/NICENANO/
    ```
 
-   The board resets as soon as it has the whole image, so `cp` can exit with `could not copy extended attributes ... Device not configured`. The flash still succeeded.
+   The board resets as soon as it has the whole image, so `cp` can exit with `could not copy extended attributes ... Device not configured` even after a good flash. Check that the board comes back as described below.
 
-After the reset the board enumerates as `Zephyr Project` (USB `2fe3:0004`) and the red LED blinks at 1 Hz. The blue LED is the charge indicator, and it flickers when no battery is connected.
+After the reset the board enumerates as USB `2fe3:0004` (manufacturer `Zephyr Project`) and the red LED blinks at 1 Hz. The blue LED is the charge indicator, and it flickers when no battery is connected.
 
 ## 8. Verify serial output (optional)
 
