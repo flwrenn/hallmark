@@ -57,6 +57,7 @@ class Trace:
     rest_sigma: float
     sign: int
     depth: list = field(default_factory=list)
+    gaps: int = 0
 
     @classmethod
     def from_raw(cls, raw):
@@ -162,7 +163,7 @@ class Board:
     def stream(self, ms, on_sample=None):
         self.send(f"stream {ms}")
         self.expect("STREAM_START")
-        raw, next_idx, dropped = [], 0, 0
+        samples, next_idx, dropped = [], 0, 0
         while True:
             line = self.read_line(5)
             if line.startswith("S,"):
@@ -170,13 +171,13 @@ class Board:
                 idx = int(idx)
                 dropped += idx - next_idx
                 next_idx = idx + 1
-                raw.append(int(value))
+                samples.append((idx, int(value)))
                 if on_sample:
                     on_sample(idx)
             elif line.startswith("STREAM_END,"):
                 end = parse_fields(line)
                 end["dropped"] = str(dropped + int(end["n"]) - next_idx)
-                return raw, end
+                return samples, end
             elif line.startswith("ERR,"):
                 raise RuntimeError(line)
 
@@ -303,14 +304,26 @@ def capture_stream(board, info, args, name, seconds, action):
         if idx % 1000 == 0:
             print(f"  {seconds - idx // 1000} s left", end="\r", flush=True)
 
-    raw, end = board.stream(seconds * 1000, progress)
-    print(f"  {len(raw)} samples, late {end['late']}, dropped {end['dropped']}")
-    if end["late"] != "0" or end["dropped"] != "0":
-        print("  WARNING: the 1 kHz timeline has gaps; treat timing-based results with care")
-    write_csv(args, name, info, ["t_ms", "raw"], enumerate(raw))
-    if len(raw) <= REST_MS:
+    samples, end = board.stream(seconds * 1000, progress)
+    gaps = int(end["late"]) + int(end["dropped"])
+    print(f"  {len(samples)} samples, late {end['late']}, dropped {end['dropped']}")
+    if gaps:
+        print("  WARNING: the 1 kHz timeline has gaps; its results are inconclusive")
+    write_csv(args, name, info, ["t_ms", "raw"], samples)
+    if len(samples) <= REST_MS:
         sys.exit("capture shorter than the hands-off second")
-    return Trace.from_raw(raw)
+    trace = Trace.from_raw([value for _, value in samples])
+    trace.gaps = gaps
+    return trace
+
+
+def gate(trace, rows):
+    """Marks graded rows inconclusive when the capture's timeline has gaps."""
+    if trace.gaps:
+        for row in rows:
+            if row.result != "-":
+                row.result = "inconclusive"
+    return rows
 
 
 def largest_reversal(depth):
@@ -343,23 +356,23 @@ def measure_curve(board, info, args):
           f"{'up' if t.sign > 0 else 'down'} on press")
     if hold is None:
         missing = f"no {HOLD_MS} ms hold found; peak {t.travel():.0f} counts"
-        return [
+        return gate(t, [
             Row("Bottom-out ADC value", missing, "-", "-", "-"),
             Row("Usable ADC range", missing, ">500 counts", "<200", "check plot"),
             Row("Linearity", missing, "Monotonic", "Dead zones", "check plot"),
-        ]
+        ])
     hold_idx, level = hold
     start = max((i for i in range(hold_idx) if t.depth[i] < 0.05 * level), default=0)
     reversal = largest_reversal(t.depth[start:hold_idx + 1])
     print(f"  press stroke {hold_idx - start} ms, bottom-out hold from {hold_idx} ms")
-    return [
+    return gate(t, [
         Row("Bottom-out ADC value", f"{t.rest + t.sign * level:.0f} counts", "-", "-", "-"),
         Row("Usable ADC range", f"{level:.0f} counts", ">500 counts", "<200",
             grade(level, lambda v: v > 500, lambda v: v < 200)),
         Row("Linearity", f"largest reversal {reversal:.1f} counts on the approach to the "
                          f"hold (3 sigma = {limit:.1f}); dead zones need the CSV plotted",
             "Monotonic", "Dead zones", "FAIL" if reversal > limit else "check plot"),
-    ]
+    ])
 
 
 def measure_taps(board, info, args):
@@ -375,8 +388,8 @@ def measure_taps(board, info, args):
     if gaps:
         detail += f", worst return to rest {int(round(max(gaps)))} counts"
     clean = len(presses) == 50 and not short
-    return [Row("Rapid tap x50", detail, "50 clean cycles", "missing or extra",
-                "PASS" if clean else "check plot")]
+    return gate(t, [Row("Rapid tap x50", detail, "50 clean cycles", "missing or extra",
+                        "PASS" if clean else "check plot")])
 
 
 def measure_repeat(board, info, args):
@@ -388,8 +401,8 @@ def measure_repeat(board, info, args):
         return [Row("Repeatability", f"{len(plateaus)} presses found, expected {REPEAT_PRESSES}",
                     "<10 counts", ">50", "inconclusive")]
     spread = max(plateaus) - min(plateaus)
-    return [Row("Repeatability", f"{spread:.0f} counts across {len(plateaus)} presses",
-                "<10 counts", ">50", grade(spread, lambda v: v < 10, lambda v: v > 50))]
+    return gate(t, [Row("Repeatability", f"{spread:.0f} counts across {len(plateaus)} presses",
+                        "<10 counts", ">50", grade(spread, lambda v: v < 10, lambda v: v > 50))])
 
 
 MEASUREMENTS = {
