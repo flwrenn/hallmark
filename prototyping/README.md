@@ -214,7 +214,7 @@ That leaves 8 spare header pins as the board stands, or 13 with the center pads 
 
 **Conflicts**
 
-1. No analog headroom. The header has exactly 3 AIN pins and all 3 carry MUX outputs. A fourth analog input (a battery divider, a fourth MUX, a thermistor) does not fit. The fallback without a bare chip: tie the three MUX outputs to one AIN and select a MUX with its E pin, using 3 spare GPIO. That frees 2 AIN but serializes all 18 conversions, which must still fit Stage 2's 500us budget.
+1. No analog headroom. The header has exactly 3 AIN pins and all 3 carry MUX outputs. A fourth analog input (a battery divider, a fourth MUX, a thermistor) does not fit. The fallback without a bare chip: tie the three MUX outputs to one AIN and select a MUX with its E pin, using 3 spare GPIO. That frees 2 AIN. The SAADC has one converter, and its scan mode converts channels one after another, so the fallback costs no parallelism. It costs MUX switching: 18 select-and-settle steps per scan instead of 6, which must still fit Stage 2's 500us budget.
 2. UART0 on P0.06/P0.08 is the console in the base (J-Link) variant (`supermini_nrf52840.dts`). The PS allows only one peripheral per GPIO, so moving the TRRS link to UARTE1 on the same pins does not help while the console holds them. Either move the base variant's console to RTT and give UART0 to the TRRS link, or put one UART on another pin pair from the unrestricted spares (D5, D6, D7). The 10 kHz pins are too slow for a UART while the radio runs. The UF2 variant logs over USB CDC ACM and leaves UART0 off.
 3. D10 and D16 are NFC pins until `nfct-pins-as-gpios` is set.
 4. The board owns P0.13 (VCC rail) and P0.15 (LED). Neither is a header pin.
@@ -226,6 +226,7 @@ That leaves 8 spare header pins as the board stands, or 13 with the center pads 
 **Unconfirmed until Stage 2 (#21)**
 
 - Scan topology: whether 3 parallel MUX outputs with shared address lines scan 18 keys in under 500us. A different topology changes the AIN and GPIO counts.
+- Oversampling: Stage 1's 4x oversampling does not carry straight over to a three-channel scan. The PS says to oversample only with one channel enabled, and the pinned Zephyr SAADC driver returns `-EINVAL` for oversampling with more than one active channel (`get_oversampling` in `drivers/adc/adc_nrfx_saadc.c`, sdk-zephyr `ncs-v3.2.1`). Stage 2 must benchmark separate single-channel oversampled bursts against multi-channel scans averaged in software.
 - AIN5 and AIN7: Stage 2 wires one MUX on AIN0, so the other two channels stay untested until a 3-MUX build.
 - Radio coexistence: PS Table 61 marks all three AIN pins "standard drive, low frequency I/O only" (up to 10 kHz), and Nordic says on DevZone that reading faster signals on them can also cost radio packets. The limit is on how fast the signal at the pin changes, which the MUX switching sets, not on the SAADC sample rate. Validate BLE with scanning active.
 - Board checks, needing hardware rather than Stage 2: the VDDH battery reading, and that our boards match the teardowns (center pads P1.01/P1.02/P1.07, no P0.04 pad).
