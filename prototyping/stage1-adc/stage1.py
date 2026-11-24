@@ -374,7 +374,7 @@ def measure_taps(board, info, args):
         detail += f", peak {min(peaks):.0f} to {max(peaks):.0f} counts"
     if gaps:
         detail += f", worst return to rest {int(round(max(gaps)))} counts"
-    clean = len(presses) >= 50 and not short
+    clean = len(presses) == 50 and not short
     return [Row("Rapid tap x50", detail, "50 clean cycles", "missing or extra",
                 "PASS" if clean else "check plot")]
 
