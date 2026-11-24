@@ -2,16 +2,16 @@
  * Common devicetree for SuperMini nRF52840.
  * Pin-compatible with Nice!Nano v2.
  *
- * Header pinout (Pro Micro compatible):
- *   D0  = P0.06 (TX)     D1  = P0.08 (RX)
+ * Header pinout (Pro Micro compatible, as in ZMK's nice_nano map):
+ *   D0  = P0.08 (RX)      D1  = P0.06 (TX)
  *   D2  = P0.17           D3  = P0.20
  *   D4  = P0.22           D5  = P0.24
  *   D6  = P1.00           D7  = P0.11
  *   D8  = P1.04           D9  = P1.06
  *   D10 = P0.09           D16 = P0.10
  *   D14 = P1.11           D15 = P1.13
- *   D18 = P0.02 (AIN0)    D19 = P0.29 (AIN5)
- *   D20 = P0.31 (AIN7)    D21 = P0.03 (AIN1)
+ *   D18 = P1.15           D19 = P0.02 (AIN0)
+ *   D20 = P0.29 (AIN5)    D21 = P0.31 (AIN7)
  *
  * Back side pads:
  *   P0.04 (AIN2)          P0.26

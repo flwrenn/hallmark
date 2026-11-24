@@ -1,6 +1,6 @@
 /*
  * Pin control for SuperMini nRF52840.
- * UART0: TX=P0.06, RX=P0.08 (matches Nice!Nano v2 D0/D1 header pins).
+ * UART0: TX=P0.06 on header D1, RX=P0.08 on header D0 (as on Nice!Nano v2).
  */
 
 &pinctrl {
