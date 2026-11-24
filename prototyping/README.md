@@ -137,13 +137,74 @@ Type "the cat sat" x100 sentences. Count false modifier activations. Compare to 
 
 **Need per half:** 3 AIN (MUX outputs) + 1 AIN (battery) + 3 GPIO (MUX addr) + 2 GPIO (UART) + USB + reset = 12-13 pins.
 
-SuperMini exposes 18 GPIO (~6 analog). Map requirements to actual pins.
+SuperMini exposes 18 header GPIO, 3 of them analog (see Result). Map requirements to actual pins.
 
 | Finding | Action |
 |---------|--------|
 | >=4 AIN + >=6 GPIO free | Use SuperMini |
 | Tight on GPIO | Creative pin sharing |
 | <3 usable AIN | Bare chip |
+
+### Result
+
+Desk audit, done before the Stage 2 hardware (#21). Sources:
+
+- Header map: the board comment in `supermini_nrf52840_common.dtsi`, which matches ZMK's nice_nano `arduino_pro_micro_pins.dtsi`.
+- Analog channels and radio-adjacent pins: nRF52840 Product Specification v1.9, Table 61 (aQFN73 ball assignments).
+- What the pads and the battery circuit connect to: two SuperMini teardowns, [sasodoma/nrf52840-promicro](https://github.com/sasodoma/nrf52840-promicro) (KiCad reverse-engineering) and [joric/nrfmicro#80](https://github.com/joric/nrfmicro/issues/80).
+
+**Needs beyond the Stage 5 list.** `docs/architecture.md` and `docs/hall-effect.md` add no pins. Checked:
+
+- MUX enable: each CD74HC4051 drives its own AIN, so each E pin ties to GND. 0 pins.
+- LED: the user LED is on-board at P0.15, and the charge LED is wired to the charger. 0 header pins.
+- Power switch: a switch in series with B+ needs no sense pin, and no doc asks for one.
+- Reset and USB: the RST header pin (P0.18, `gpio-as-nreset`) and the USB-C connector's dedicated D+/D-. 0 GPIO.
+- Sensor power, not in the docs: 18 A1304s draw 7.7 mA each (datasheet typical), about 139 mA, or 5 h on the 750 mAh cell. Wireless use will need to switch sensor power. The P0.13 VCC rail can do it with 0 extra pins if sensors and MUXes run from VCC. A separate load switch costs 1 GPIO.
+
+**Pin assignment.** The same on both halves.
+
+| Function | Header | nRF pin | Note |
+|---|---|---|---|
+| MUX 0 output | D19 | P0.02 / AIN0 | Stage 2 wiring |
+| MUX 1 output | D20 | P0.29 / AIN5 | |
+| MUX 2 output | D21 | P0.31 / AIN7 | |
+| MUX S0, S1, S2 (shared) | D2, D3, D4 | P0.17, P0.20, P0.22 | Stage 2 wiring. No radio restriction |
+| UART TX to TRRS | D1 | P0.06 | Board UART0 pinctrl |
+| UART RX from TRRS | D0 | P0.08 | Board UART0 pinctrl |
+| Battery voltage | none | VDDH, SAADC input VDDHDIV5 | See battery sensing |
+| MUX enable (x3) | none | GND | |
+
+Used: 3 AIN and 5 GPIO.
+
+**Spare pins.** None has an analog channel. The PS limits pins near the radio to signals up to 10 kHz.
+
+| Pins | Limit |
+|---|---|
+| D5 (P0.24), D6 (P1.00), D7 (P0.11) | None |
+| D8 (P1.04), D9 (P1.06), D14 (P1.11), D15 (P1.13), D18 (P1.15) | Up to 10 kHz |
+| Center pads P1.01, P1.02, P1.07 | Up to 10 kHz. Solder pads, not header pins |
+| D10 (P0.09), D16 (P0.10) | NFC pins. GPIO only after `&uicr` sets `nfct-pins-as-gpios`. Up to 10 kHz |
+
+That leaves 8 spare header pins as the board stands, or 13 with the center pads and NFC pins.
+
+**Battery sensing.** The SuperMini has no working battery divider. The nice!nano v1 divided the battery onto P0.04 (AIN2). The SuperMini schematic draws that divider unpopulated, and the teardown found its trace goes to P0.24 (D5), which has no analog input. P0.04 reaches no header pin or pad. The battery is readable only as VDDH through the SAADC's internal VDDHDIV5 input, which is what ZMK's nice!nano v2 target does (`zmk,battery-nrf-vddh`). Confidence: high that no analog pin carries battery voltage. Two teardowns agree, and neither ZMK's header map nor pdcook's SuperMini Arduino variant routes P0.04 anywhere. Not measured on our boards. With USB connected, VDDH follows USB instead of the cell, so the reading is valid only on battery. In Phase 1 that affects only the central half, which runs on USB.
+
+**Conflicts**
+
+1. No analog headroom. The header has exactly 3 AIN pins and all 3 carry MUX outputs. A fourth analog input (a battery divider, a fourth MUX, a thermistor) does not fit. The fallback without a bare chip: tie the three MUX outputs to one AIN and select a MUX with its E pin, using 3 spare GPIO. That frees 2 AIN but serializes all 18 conversions, which must still fit Stage 2's 500us budget.
+2. UART0 on P0.06/P0.08 is the console in the base (J-Link) variant. The TRRS link takes UARTE1 on the same pins, or the base variant moves its console to RTT. The UF2 variant logs over USB CDC ACM and leaves UART0 off.
+3. D10 and D16 are NFC pins until `nfct-pins-as-gpios` is set.
+4. The board owns P0.13 (VCC rail) and P0.15 (LED). Neither is a header pin.
+5. ZMK's `D18/A0`-style names are Arduino labels, not nRF channels. A0 is P1.15 and A6 is P0.22, and neither is analog. Only D19, D20, and D21 carry AIN.
+6. D5 (P0.24) carries the divider footprint. The teardowns report it unpopulated. Check a board before relying on D5.
+
+**Verdict.** The SuperMini is enough for one half, and a bare nRF52840 is not needed. Against the finding table it has 3 usable AIN, which is neither >=4 nor <3, and 13 free GPIO against 5 needed. The fourth AIN in the need list was the battery, and VDDH reads the battery without a pin, so 3 AIN cover the design. There is no analog margin: the verdict holds only while a half needs 3 analog inputs.
+
+**Unconfirmed until Stage 2 (#21)**
+
+- Scan topology: whether 3 parallel MUX outputs with shared address lines scan 18 keys in under 500us. A different topology changes the AIN and GPIO counts.
+- AIN5 and AIN7: Stage 2 wires one MUX on AIN0, so the other two channels stay untested until a 3-MUX build.
+- Board checks, needing hardware rather than Stage 2: the VDDH battery reading, and that our boards match the teardowns (center pads P1.01/P1.02/P1.07, no P0.04 pad).
 
 ## Stage 6: LLPM Wireless (parallel)
 
