@@ -223,12 +223,12 @@ def flash(args):
     if not os.path.isfile(args.uf2):
         sys.exit(f"{args.uf2} missing; build first (see README.md)")
     if not os.path.isdir(VOLUME):
-        for port in zephyr_ports():
-            with serial.Serial(port, 115200, timeout=1) as s:
-                s.dtr = True
-                s.write(b"\nb\n")
-                s.flush()
-            print(f"sent 'b' to {port}")
+        port = pick_port(args.port)
+        with serial.Serial(port, 115200, timeout=1) as s:
+            s.dtr = True
+            s.write(b"\nb\n")
+            s.flush()
+        print(f"sent 'b' to {port}")
         print(f"waiting for {VOLUME} (double-tap RST if it does not appear)")
         wait_for(lambda: os.path.isdir(VOLUME), 60, VOLUME)
         time.sleep(1)

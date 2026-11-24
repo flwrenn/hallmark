@@ -23,7 +23,7 @@ west build -b supermini_nrf52840/nrf52840/uf2 prototyping/stage1-adc -- -DBOARD_
 ~/.ncs/.venv/bin/python prototyping/stage1-adc/stage1.py flash
 ```
 
-The build writes `build/stage1-adc/zephyr/zephyr.uf2`. Add `-p always` when `build/` last held another app. `flash` sends `b` to every Zephyr USB serial port, which reboots this app into the UF2 bootloader, then copies the image and checks that the app answers. A board running other firmware needs a double-tap on RST first.
+The build writes `build/stage1-adc/zephyr/zephyr.uf2`. Add `-p always` when `build/` last held another app. `flash` sends `b` to the `--port` you pass, or to the only Zephyr USB serial port, and refuses to guess between several. That reboots this app into the UF2 bootloader, then copies the image and checks that the app answers. A board running other firmware needs a double-tap on RST first.
 
 ## Measure
 
