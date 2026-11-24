@@ -28,6 +28,7 @@ VOLUME = "/Volumes/NICENANO"
 ZEPHYR_USB_VID = 0x2FE3
 REST_MS = 1000
 SMOOTH_MS = 5
+HOLD_MS = 500
 MIN_TRAVEL_COUNTS = 50
 
 
@@ -319,24 +320,44 @@ def largest_reversal(depth):
     return worst
 
 
+def find_hold(depth, tolerance):
+    """First start and median of the deepest HOLD_MS stretch within tolerance, or None."""
+    best = None
+    for i in range(len(depth) - HOLD_MS + 1):
+        seg = depth[i:i + HOLD_MS]
+        if max(seg) - min(seg) > tolerance:
+            continue
+        level = statistics.median(seg)
+        if level >= MIN_TRAVEL_COUNTS and (best is None or level > best[1] + tolerance):
+            best = (i, level)
+    return best
+
+
 def measure_curve(board, info, args):
     t = capture_stream(board, info, args, "curve", args.seconds or 10,
                        "press slowly to bottom-out, hold one second, release slowly.")
-    full = t.travel()
-    bottom_idx = next(i for i, d in enumerate(t.depth) if d >= 0.98 * full)
-    start = max((i for i in range(bottom_idx) if t.depth[i] < 0.05 * full), default=0)
-    reversal = largest_reversal(t.depth[start:bottom_idx + 1])
     limit = 3 * t.rest_sigma
-    monotonic = reversal <= limit
+    hold = find_hold(t.depth, max(2 * limit, 0.03 * t.travel()))
     print(f"  rest {t.rest:.1f}, rest sigma {t.rest_sigma:.2f}, output moves "
-          f"{'up' if t.sign > 0 else 'down'} on press, press stroke {bottom_idx - start} ms")
+          f"{'up' if t.sign > 0 else 'down'} on press")
+    if hold is None:
+        missing = f"no {HOLD_MS} ms hold found; peak {t.travel():.0f} counts"
+        return [
+            Row("Bottom-out ADC value", missing, "-", "-", "-"),
+            Row("Usable ADC range", missing, ">500 counts", "<200", "check plot"),
+            Row("Linearity", missing, "Monotonic", "Dead zones", "check plot"),
+        ]
+    hold_idx, level = hold
+    start = max((i for i in range(hold_idx) if t.depth[i] < 0.05 * level), default=0)
+    reversal = largest_reversal(t.depth[start:hold_idx + 1])
+    print(f"  press stroke {hold_idx - start} ms, bottom-out hold from {hold_idx} ms")
     return [
-        Row("Bottom-out ADC value", f"{t.rest + t.sign * full:.0f} counts", "-", "-", "-"),
-        Row("Usable ADC range", f"{full:.0f} counts", ">500 counts", "<200",
-            grade(full, lambda v: v > 500, lambda v: v < 200)),
-        Row("Linearity", f"largest reversal {reversal:.1f} counts on the press stroke "
-                         f"(3 sigma = {limit:.1f}); dead zones need the CSV plotted",
-            "Monotonic", "Dead zones", "PASS" if monotonic else "FAIL"),
+        Row("Bottom-out ADC value", f"{t.rest + t.sign * level:.0f} counts", "-", "-", "-"),
+        Row("Usable ADC range", f"{level:.0f} counts", ">500 counts", "<200",
+            grade(level, lambda v: v > 500, lambda v: v < 200)),
+        Row("Linearity", f"largest reversal {reversal:.1f} counts on the approach to the "
+                         f"hold (3 sigma = {limit:.1f}); dead zones need the CSV plotted",
+            "Monotonic", "Dead zones", "FAIL" if reversal > limit else "check plot"),
     ]
 
 
