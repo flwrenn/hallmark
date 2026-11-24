@@ -10,7 +10,7 @@
 | Output | Analog |
 | Supply | 3.0-3.6V ([datasheet](https://www.allegromicro.com/-/media/files/datasheets/a1304-datasheet.pdf) Rev. 4) |
 | Supply current | 7.7 mA typical, 9 mA max, no load on VOUT |
-| Sensitivity | 4.0 mV/G typical (3.76-4.24), A1304ELHLX-T |
+| Sensitivity | 4.0 mV/G typical (3.76-4.24) at 3.3 V and 25 °C, A1304ELHLX-T |
 | Package | SOT-23 |
 
 One sensor per key (36 total), read through 3x CD74HC4051 multiplexers per half.
