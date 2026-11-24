@@ -22,6 +22,7 @@
 | Home Row Mod | Central | Depth + time hybrid tap/hold decision | `home_row_mod.c` |
 | SOCD | Central | Last-input-wins opposing key resolution | `socd.c` |
 | Keymap config | Central | Layer arrays, HRM thresholds, hand sets, combos, SOCD pairs as `const` tables. Vocabulary (layers, positions, keycodes, action encoding) in `keymap_config.h`. | `keymap_config.c` |
+| Packet | All | Inter-half packet: 15 bytes (sync, half id, 6x16-bit positions, CRC-8/SMBUS). Pack, unpack, and a byte-stream parser that resyncs after garbage or a lost sync byte. The Transport module moves the bytes. | `packet.c` |
 
 ### Planned
 
