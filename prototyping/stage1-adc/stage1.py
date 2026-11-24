@@ -28,7 +28,10 @@ VOLUME = "/Volumes/NICENANO"
 ZEPHYR_USB_VID = 0x2FE3
 REST_MS = 1000
 SMOOTH_MS = 5
-HOLD_MS = 500
+CURVE_SMOOTH_MS = 20
+SETTLE_MS = 500
+SETTLE_SIGMAS = 10
+SETTLE_FLOOR_COUNTS = 10
 REPEAT_PRESSES = 20
 MIN_TRAVEL_COUNTS = 50
 
@@ -327,52 +330,68 @@ def gate(trace, rows):
 
 
 def largest_reversal(depth):
-    worst, top = 0.0, -math.inf
-    for d in depth:
-        top = max(top, d)
-        worst = max(worst, top - d)
-    return worst
+    """Largest drop below the running maximum, with the indices of that maximum and the drop."""
+    worst, top, top_at, span = 0.0, -math.inf, 0, (0, 0)
+    for i, d in enumerate(depth):
+        if d > top:
+            top, top_at = d, i
+        if top - d > worst:
+            worst, span = top - d, (top_at, i)
+    return worst, span
 
 
-def find_hold(depth, tolerance):
-    """First start and median of the deepest HOLD_MS stretch within tolerance, or None."""
-    best = None
-    for i in range(len(depth) - HOLD_MS + 1):
-        seg = depth[i:i + HOLD_MS]
-        if max(seg) - min(seg) > tolerance:
-            continue
-        level = statistics.median(seg)
-        if level >= MIN_TRAVEL_COUNTS and (best is None or level > best[1] + tolerance):
-            best = (i, level)
-    return best
+def diff_sigma(xs):
+    """Noise sigma from successive differences, which a slow drift does not inflate."""
+    return statistics.stdev(b - a for a, b in zip(xs, xs[1:])) / math.sqrt(2)
+
+
+def unsettled_end(head, tail, limit):
+    for name, window in (("rest", head), ("bottom-out", tail)):
+        spread = max(window) - min(window)
+        if spread > limit:
+            return f"not settled at {name}: {SETTLE_MS} ms spread {spread} > {limit:.0f} counts"
+    return None
+
+
+def grade_curve(raw):
+    """Grades a capture that rests for its first SETTLE_MS and holds bottom-out for its last."""
+    head, tail = raw[:SETTLE_MS], raw[-SETTLE_MS:]
+    rest, bottom = statistics.median(head), statistics.median(tail)
+    sigma = diff_sigma(head)
+    limit = 3 * sigma
+    settle = max(SETTLE_SIGMAS * sigma, SETTLE_FLOOR_COUNTS)
+    sign = 1 if bottom >= rest else -1
+    span = abs(bottom - rest)
+    print(f"  rest {rest:.1f}, bottom-out {bottom:.1f}, rest sigma {sigma:.2f}, output moves "
+          f"{'up' if sign > 0 else 'down'} on press")
+    problem = unsettled_end(head, tail, settle)
+    if problem is None and span <= settle:
+        problem = f"bottom-out reads rest ({span:.0f} counts apart); hold it until the end"
+    if problem:
+        return [
+            Row("Bottom-out ADC value", problem, "-", "-", "-"),
+            Row("Usable ADC range", problem, ">500 counts", "<200", "inconclusive"),
+            Row("Linearity", problem, "Monotonic", "Dead zones", "inconclusive"),
+        ]
+    warm = CURVE_SMOOTH_MS - 1
+    depth = [sign * (x - rest) for x in moving_average(raw, CURVE_SMOOTH_MS)[warm:]]
+    reversal, (top_at, low_at) = largest_reversal(depth)
+    where = f" from {top_at + warm} ms to {low_at + warm} ms" if reversal > limit else ""
+    return [
+        Row("Bottom-out ADC value", f"{bottom:.0f} counts", "-", "-", "-"),
+        Row("Usable ADC range", f"{span:.0f} counts", ">500 counts", "<200",
+            grade(span, lambda v: v > 500, lambda v: v < 200)),
+        Row("Linearity", f"largest reversal {reversal:.1f} counts{where} (3 sigma = "
+                         f"{limit:.1f}); dead zones need the CSV plotted",
+            "Monotonic", "Dead zones", "FAIL" if reversal > limit else "check plot"),
+    ]
 
 
 def measure_curve(board, info, args):
     t = capture_stream(board, info, args, "curve", args.seconds or 10,
-                       "press slowly to bottom-out, hold one second, release slowly.")
-    limit = 3 * t.rest_sigma
-    hold = find_hold(t.depth, max(2 * limit, 0.03 * t.travel()))
-    print(f"  rest {t.rest:.1f}, rest sigma {t.rest_sigma:.2f}, output moves "
-          f"{'up' if t.sign > 0 else 'down'} on press")
-    if hold is None:
-        missing = f"no {HOLD_MS} ms hold found; peak {t.travel():.0f} counts"
-        return gate(t, [
-            Row("Bottom-out ADC value", missing, "-", "-", "-"),
-            Row("Usable ADC range", missing, ">500 counts", "<200", "check plot"),
-            Row("Linearity", missing, "Monotonic", "Dead zones", "check plot"),
-        ])
-    hold_idx, level = hold
-    start = max((i for i in range(hold_idx) if t.depth[i] < 0.05 * level), default=0)
-    reversal = largest_reversal(t.depth[start:hold_idx + 1])
-    print(f"  press stroke {hold_idx - start} ms, bottom-out hold from {hold_idx} ms")
-    return gate(t, [
-        Row("Bottom-out ADC value", f"{t.rest + t.sign * level:.0f} counts", "-", "-", "-"),
-        Row("Usable ADC range", f"{level:.0f} counts", ">500 counts", "<200",
-            grade(level, lambda v: v > 500, lambda v: v < 200)),
-        Row("Linearity", f"largest reversal {reversal:.1f} counts on the approach to the "
-                         f"hold (3 sigma = {limit:.1f}); dead zones need the CSV plotted",
-            "Monotonic", "Dead zones", "FAIL" if reversal > limit else "check plot"),
-    ])
+                       "press slowly to bottom-out, reach it at least 1 s before the end, "
+                       "and stay there until the capture ends.")
+    return gate(t, grade_curve(t.raw))
 
 
 def measure_taps(board, info, args):

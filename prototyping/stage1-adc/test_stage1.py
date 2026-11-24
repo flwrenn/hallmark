@@ -9,6 +9,7 @@ import csv
 import io
 import os
 import random
+import re
 import sys
 import tempfile
 import types
@@ -90,30 +91,66 @@ class Capture:
         return self.rows[metric].measured
 
 
+def stroke(*legs, rest=1000):
+    """Rest for one second, then ramp through each (level, ms) leg in turn."""
+    trace, level = flat(rest, 1000), rest
+    for target, ms in legs:
+        trace += ramp(level, target, ms) if ms else []
+        level = target
+    return trace
+
+
 class Curve(unittest.TestCase):
+    def bottom(self, c):
+        return int(c.measured("Bottom-out ADC value").split()[0])
+
     def test_overshoot_then_held_endpoint_reports_the_hold_and_fails(self):
-        trace = (flat(1000, 1000) + ramp(1000, 1600, 1000) + ramp(1600, 1350, 300)
-                 + flat(1350, 1000) + ramp(1350, 1000, 1000) + flat(1000, 500))
+        trace = stroke((1600, 1000), (1350, 300)) + flat(1350, 1000)
         c = Capture(stage1.measure_curve, noisy(trace))
-        bottom = int(c.measured("Bottom-out ADC value").split()[0])
-        self.assertLessEqual(abs(bottom - 1350), 5)
+        self.assertLessEqual(abs(self.bottom(c) - 1350), 5)
         self.assertEqual(c.result("Linearity"), "FAIL")
         self.assertNotEqual(c.result("Usable ADC range"), "PASS")
 
-    def test_clean_stroke_grades_range_and_leaves_dead_zones_to_the_plot(self):
-        trace = (flat(2000, 1000) + ramp(2000, 1200, 1500) + flat(1200, 1000)
-                 + ramp(1200, 2000, 1500) + flat(2000, 500))
+    def test_small_overshoot_into_the_held_endpoint_fails(self):
+        trace = stroke((1615, 1000), (1600, 100)) + flat(1600, 1000)
         c = Capture(stage1.measure_curve, noisy(trace))
-        bottom = int(c.measured("Bottom-out ADC value").split()[0])
-        self.assertLessEqual(abs(bottom - 1200), 5)
+        self.assertEqual(c.result("Linearity"), "FAIL")
+        top_at = int(re.search(r"from (\d+) ms", c.measured("Linearity")).group(1))
+        self.assertLessEqual(abs(top_at - 2000), 20)
+
+    def test_short_held_stroke_fails_range(self):
+        c = Capture(stage1.measure_curve, noisy(stroke((1040, 500)) + flat(1040, 1000)))
+        self.assertEqual(c.result("Usable ADC range"), "FAIL")
+
+    def test_range_comes_from_the_final_hold_not_an_earlier_shelf(self):
+        trace = stroke((1490, 1000)) + flat(1490, 600) + ramp(1490, 1505, 50) + flat(1505, 1000)
+        c = Capture(stage1.measure_curve, noisy(trace))
+        self.assertLessEqual(abs(self.bottom(c) - 1505), 5)
+        self.assertEqual(c.result("Usable ADC range"), "PASS")
+
+    def test_clean_stroke_grades_range_and_leaves_dead_zones_to_the_plot(self):
+        trace = stroke((1200, 1500), rest=2000) + flat(1200, 1000)
+        c = Capture(stage1.measure_curve, noisy(trace))
+        self.assertLessEqual(abs(self.bottom(c) - 1200), 5)
         self.assertEqual(c.result("Usable ADC range"), "PASS")
         self.assertEqual(c.result("Linearity"), "check plot")
 
-    def test_stroke_without_a_hold_is_not_graded(self):
-        trace = flat(1000, 1000) + ramp(1000, 1600, 1500) + ramp(1600, 1000, 1500)
-        c = Capture(stage1.measure_curve, noisy(trace + flat(1000, 500)))
-        self.assertEqual(c.result("Usable ADC range"), "check plot")
-        self.assertEqual(c.result("Linearity"), "check plot")
+    def test_release_before_the_end_is_not_graded(self):
+        trace = stroke((1600, 1500), (1000, 1500)) + flat(1000, 500)
+        c = Capture(stage1.measure_curve, noisy(trace))
+        self.assertEqual(c.result("Usable ADC range"), "inconclusive")
+        self.assertEqual(c.result("Linearity"), "inconclusive")
+
+    def test_still_moving_at_the_end_is_not_graded(self):
+        c = Capture(stage1.measure_curve, noisy(stroke((1600, 9000))))
+        self.assertEqual(c.result("Usable ADC range"), "inconclusive")
+        self.assertIn("not settled at bottom-out", c.measured("Linearity"))
+
+    def test_pressing_during_the_rest_window_is_not_graded(self):
+        trace = flat(1000, 200) + ramp(1000, 1600, 2000) + flat(1600, 1000)
+        c = Capture(stage1.measure_curve, noisy(trace))
+        self.assertEqual(c.result("Linearity"), "inconclusive")
+        self.assertIn("not settled at rest", c.measured("Usable ADC range"))
 
 
 class Repeat(unittest.TestCase):
