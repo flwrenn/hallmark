@@ -188,9 +188,9 @@ Desk audit, done before the Stage 2 hardware (#21). Sources:
 
 | Function | Header | nRF pin | Note |
 |---|---|---|---|
-| MUX 0 output | D19 | P0.02 / AIN0 | Stage 2 wiring |
-| MUX 1 output | D20 | P0.29 / AIN5 | |
-| MUX 2 output | D21 | P0.31 / AIN7 | |
+| MUX 0 output | D19 | P0.02 / AIN0 | Stage 2 wiring. Up to 10 kHz |
+| MUX 1 output | D20 | P0.29 / AIN5 | Up to 10 kHz |
+| MUX 2 output | D21 | P0.31 / AIN7 | Up to 10 kHz |
 | MUX S0, S1, S2 (shared) | D2, D3, D4 | P0.17, P0.20, P0.22 | Stage 2 wiring. No radio restriction |
 | UART TX to TRRS | D1 | P0.06 | Board UART0 pinctrl |
 | UART RX from TRRS | D0 | P0.08 | Board UART0 pinctrl |
@@ -227,6 +227,7 @@ That leaves 8 spare header pins as the board stands, or 13 with the center pads 
 
 - Scan topology: whether 3 parallel MUX outputs with shared address lines scan 18 keys in under 500us. A different topology changes the AIN and GPIO counts.
 - AIN5 and AIN7: Stage 2 wires one MUX on AIN0, so the other two channels stay untested until a 3-MUX build.
+- Radio coexistence: PS Table 61 marks all three AIN pins "standard drive, low frequency I/O only" (up to 10 kHz), and Nordic says on DevZone that reading faster signals on them can also cost radio packets. The limit is on how fast the signal at the pin changes, which the MUX switching sets, not on the SAADC sample rate. Validate BLE with scanning active.
 - Board checks, needing hardware rather than Stage 2: the VDDH battery reading, and that our boards match the teardowns (center pads P1.01/P1.02/P1.07, no P0.04 pad).
 
 ## Stage 6: LLPM Wireless (parallel)
