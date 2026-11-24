@@ -151,7 +151,7 @@ Hallmark builds against its own HWMv2 board definition in `boards/supermini/supe
 Zephyr also ships a board for this hardware, [`promicro_nrf52840`](https://docs.zephyrproject.org/latest/boards/others/promicro_nrf52840/doc/index.html), which names the SuperMini in its documentation. The two differ:
 
 - **Link address.** Under the nRF Connect SDK, sysbuild turns on Partition Manager, which ignores the devicetree code partition and links the app at 0x0. Built with NCS v3.2.1, the upstream UF2 variant links at 0x0 too, while the bootloader loads the image at 0x26000. Ours turns Partition Manager off for the UF2 variant in `Kconfig.sysbuild`, and its `CMakeLists.txt` fails the build if Partition Manager comes back on.
-- **Peripherals.** Upstream enables UART0, I2C0, I2C1, SPI2, and PWM0, and turns the NFC pins (P0.09, P0.10) into GPIOs. Ours enables UART0 in the base variant only, and P0.09 and P0.10 stay NFC pins.
+- **Peripherals.** Upstream enables UART0, I2C0, I2C1, SPI2, and PWM0, and turns the NFC pins (P0.09, P0.10) into GPIOs. Ours enables UART0 in the base variant only and does not set `nfct-pins-as-gpios`. The nice!nano bootloader may already have cleared UICR.NFCPINS, which makes P0.09 and P0.10 plain GPIO; see the Stage 5 pin audit in [prototyping/README.md](../prototyping/README.md).
 - **Power.** Ours selects DC/DC mode for REG1 and describes the VCC LDO enable on P0.13.
 
 The board is pin-compatible with Nice!Nano v2. Key differences:
