@@ -61,7 +61,7 @@ Validate every risky assumption before PCB fabrication. 6 stages.
 **Goal:** 6+ keys via MUX, fast and clean. Magnetic crosstalk at 19mm spacing.
 
 ```
-[SuperMini] -- AIN0 (P0.02, pin D19) <- MUX output
+[SuperMini] -- AIN0 (P0.02) <- MUX output
             -- P0.17/20/22 (pins D2/D3/D4) -> MUX S0/S1/S2 (shared address)
 [CD74HC4051M96 on adapter] -- CH0-CH5 <- 6x A1304 under 6x switches
 ```
