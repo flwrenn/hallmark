@@ -206,9 +206,9 @@ Used: 3 AIN and 5 GPIO.
 | D5 (P0.24), D6 (P1.00), D7 (P0.11) | None |
 | D8 (P1.04), D9 (P1.06), D14 (P1.11), D15 (P1.13), D18 (P1.15) | Up to 10 kHz |
 | Center pads P1.01, P1.02, P1.07 | Up to 10 kHz. Solder pads, not header pins |
-| D10 (P0.09), D16 (P0.10) | NFC pins. GPIO only after `&uicr` sets `nfct-pins-as-gpios`. Up to 10 kHz |
+| D10 (P0.09), D16 (P0.10) | NFC pins while UICR.NFCPINS is set. The nice!nano bootloader clears it (`CONFIG_NFCT_PINS_AS_GPIOS` in Adafruit bootloader 0.6.0 and 0.6.2), so they are likely GPIO on our boards. Up to 10 kHz |
 
-That leaves 8 spare header pins as the board stands, or 13 with the center pads and NFC pins.
+That leaves 8 spare header pins with an erased UICR, 10 if the bootloader has cleared UICR.NFCPINS, or 13 with the center pads too. Read UICR.NFCPINS on a board to confirm.
 
 **Battery sensing.** The SuperMini has no working battery divider. The nice!nano v1 divided the battery onto P0.04 (AIN2). The SuperMini schematic draws that divider unpopulated, and the teardown found its trace goes to P0.24 (D5), which has no analog input. P0.04 reaches no header pin or pad. The battery is readable only as VDDH through the SAADC's internal VDDHDIV5 input, which is what ZMK's nice!nano v2 target does (`zmk,battery-nrf-vddh`). Confidence: high that no analog pin carries battery voltage. Two teardowns agree, and neither ZMK's header map nor pdcook's SuperMini Arduino variant routes P0.04 anywhere. Not measured on our boards. With USB connected, VDDH follows USB instead of the cell, so the reading is valid only on battery. In Phase 1 that affects only the central half, which runs on USB.
 
@@ -216,13 +216,13 @@ That leaves 8 spare header pins as the board stands, or 13 with the center pads 
 
 1. No analog headroom. The header has exactly 3 AIN pins and all 3 carry MUX outputs. A fourth analog input (a battery divider, a fourth MUX, a thermistor) does not fit. The fallback without a bare chip: tie the three MUX outputs to one AIN and select a MUX with its E pin, using 3 spare GPIO. That frees 2 AIN. The SAADC has one converter, and its scan mode converts channels one after another, so the fallback costs no parallelism. It costs MUX switching: 18 select-and-settle steps per scan instead of 6, which must still fit Stage 2's 500us budget.
 2. UART0 on P0.06/P0.08 is the console in the base (J-Link) variant (`supermini_nrf52840.dts`). The PS allows only one peripheral per GPIO, so moving the TRRS link to UARTE1 on the same pins does not help while the console holds them. Either move the base variant's console to RTT and give UART0 to the TRRS link, or put one UART on another pin pair from the unrestricted spares (D5, D6, D7). The 10 kHz pins are too slow for a UART while the radio runs. The UF2 variant logs over USB CDC ACM and leaves UART0 off.
-3. D10 and D16 are NFC pins until `nfct-pins-as-gpios` is set.
+3. D10 and D16 are NFC pins until UICR.NFCPINS is cleared, either by `nfct-pins-as-gpios` or by the nice!nano bootloader. Confirm on the board before wiring them.
 4. The board owns P0.13 (VCC rail) and P0.15 (LED). Neither is a header pin.
 5. ZMK's `D18/A0`-style names are Arduino labels, not nRF channels. A0 is P1.15 and A6 is P0.22, and neither is analog. Only D19, D20, and D21 carry AIN.
 6. D5 (P0.24) carries the divider footprint. The teardowns report it unpopulated. Check a board before relying on D5.
 7. Wiring 3.3 V MUXes straight to the pins assumes the nRF's own VDD is 3.3 V. Powered through VDDH, the nRF sets VDD, and with it the GPIO high level and the highest voltage a pin or SAADC input may see, from UICR REGOUT0, which defaults to 1.8 V when the UICR is erased. The nice!nano bootloader writes 3.3 V there (Adafruit bootloader 0.6.2, `UICR_REGOUT0_VALUE` in `src/boards/nice_nano/board.h`). Our board files configure only REG1, not REGOUT0. On a base-variant (J-Link) board, measure VDD, not only the header VCC, before connecting the MUX.
 
-**Verdict.** On paper, the proposed pinout for one half fits the SuperMini with eight default header spares. Against the finding table it has 3 usable AIN, which is neither >=4 nor <3, and 5 GPIO used. Reclaiming the center pads and NFC pins would raise the spares to 13. The fourth AIN in the need list was the battery, and VDDH reads the battery without a pin, so 3 AIN cover the design. There is no analog margin: the fit holds only while a half needs 3 analog inputs. The board decision stays with #37.
+**Verdict.** On paper, the proposed pinout for one half fits the SuperMini with eight header spares on an erased UICR, likely ten on boards flashed through the nice!nano bootloader. Against the finding table it has 3 usable AIN, which is neither >=4 nor <3, and 5 GPIO used. Adding the center pads would raise the spares to 13. The fourth AIN in the need list was the battery, and VDDH reads the battery without a pin, so 3 AIN cover the design. There is no analog margin: the fit holds only while a half needs 3 analog inputs. The board decision stays with #37.
 
 **Unconfirmed until Stage 2 (#21)**
 

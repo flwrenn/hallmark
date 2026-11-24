@@ -13,7 +13,9 @@
  *   D18 = P1.15           D19 = P0.02 (AIN0)
  *   D20 = P0.29 (AIN5)    D21 = P0.31 (AIN7)
  *
- * D10 and D16 stay NFC pins: &uicr does not set nfct-pins-as-gpios.
+ * D10 and D16 are NFC pins while UICR.NFCPINS is set. &uicr does not set
+ * nfct-pins-as-gpios, but the nice!nano UF2 bootloader clears UICR.NFCPINS,
+ * so on boards flashed through it they are likely plain GPIO.
  *
  * Pads between the header rows (no analog input):
  *   P1.01                 P1.02                 P1.07
