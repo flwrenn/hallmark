@@ -58,7 +58,7 @@ Validate every risky assumption before PCB fabrication. 6 stages.
 
 ### Result: SAADC noise floor without a sensor (2026-11-24)
 
-Measured on a bare micro-nrf ProMicro nRF52840, powered from a Mac over USB, in three sessions. Each run took 1000 readings at 12-bit, internal reference, gain 1/6, with a 1 ms sleep after each read. Each figure is the median sigma, in counts, of 5 runs; a range spans the medians of the sessions that measured that row.
+Measured on a bare micro-nrf ProMicro nRF52840, powered from a Mac over USB, in three sessions. Each run took 1000 readings at 12-bit, gain 1/6, with a 1 ms sleep after each read. The table uses the internal reference. Each figure is the median sigma, in counts, of 5 runs; a range spans the medians of the sessions that measured that row.
 
 | Input | Acquisition | 1x | 4x | 16x |
 |---|---|---|---|---|
@@ -69,9 +69,9 @@ Measured on a bare micro-nrf ProMicro nRF52840, powered from a Mac over USB, in 
 
 Differential counts are twice the size of single-ended counts in volts.
 
-- **Drift within a session.** In both sessions that interleaved 10 us and 3 us runs, VDD 1x sigma at 10 us rose from about 5.4 in rounds 1 and 2 to 6.7 to 7.1 in rounds 3 to 5. The 3 us runs in the same rounds stayed at 4.5 to 5.0. The cause is unknown.
+- **Drift within a session.** In both sessions that interleaved 10 us and 3 us runs, VDD 1x sigma at 10 us rose from about 5.4 to 5.7 in rounds 1 and 2 to 6.7 to 7.1 in rounds 3 to 5. The 3 us runs in the same rounds stayed at 4.5 to 5.0. The cause is unknown.
 - **Oversampling.** 4x cuts sigma by about 1.7x to 1.8x on the differential input and 1.9x to 2.4x on VDD. 16x helps less than 1/sqrt(N) predicts on the differential input, about 2.9x instead of 4x, as the readings approach the 12-bit quantization floor.
-- **Acquisition time.** On the VDD input, 3 us was no noisier than 10 us. The differential rows cannot show an acquisition effect, because both inputs see the same node.
+- **Acquisition time.** On the VDD input, 3 us was no noisier than 10 us. The tied-input differential rows compare residual noise only; they do not measure settling of a real signal.
 - **Reference.** In session 1, a VDD/4 reference read about 5% less noise than the internal reference once scaled to the same signal swing (4.9 against 5.2 counts at 1x). That compares the supply against a reference derived from the same supply, so it does not settle the reference for the A1304.
 - **Offset.** The differential input reads about -7 counts (-12 mV) with no signal. Run offset calibration at boot and after temperature changes.
 
