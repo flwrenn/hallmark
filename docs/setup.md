@@ -144,6 +144,8 @@ Press `Ctrl-A` then `Ctrl-\` to exit screen.
 | Host | macOS (Apple Silicon) |
 | Board | micro-nrf ProMicro nRF52840, nice!nano UF2 bootloader 0.6.0, S140 6.1.1 |
 
+CI (`.github/workflows/build-and-test.yml`) builds both board variants in Nordic's `sdk-nrf-toolchain` container for the same nRF Connect SDK tag, runs the host tests, and checks formatting with clang-format 23.1.5. Bump the workflow's versions when this table changes.
+
 ## Board definition
 
 Hallmark builds against its own HWMv2 board definition in `boards/supermini/supermini_nrf52840/`. The `-DBOARD_ROOT=$(pwd)` flag in the build command tells west where to find it.
