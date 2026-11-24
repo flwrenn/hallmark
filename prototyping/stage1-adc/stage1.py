@@ -29,6 +29,7 @@ ZEPHYR_USB_VID = 0x2FE3
 REST_MS = 1000
 SMOOTH_MS = 5
 HOLD_MS = 500
+REPEAT_PRESSES = 20
 MIN_TRAVEL_COUNTS = 50
 
 
@@ -380,11 +381,12 @@ def measure_taps(board, info, args):
 
 def measure_repeat(board, info, args):
     t = capture_stream(board, info, args, "repeat", args.seconds or 40,
-                       "press to the same depth 20 times, holding each about half a second.")
+                       f"press to the same depth {REPEAT_PRESSES} times, holding each about "
+                       "half a second.")
     plateaus = [p.plateau for p in t.presses()]
-    if len(plateaus) < 2:
-        return [Row("Repeatability", f"{len(plateaus)} presses found", "<10 counts", ">50",
-                    "FAIL")]
+    if len(plateaus) != REPEAT_PRESSES:
+        return [Row("Repeatability", f"{len(plateaus)} presses found, expected {REPEAT_PRESSES}",
+                    "<10 counts", ">50", "inconclusive")]
     spread = max(plateaus) - min(plateaus)
     return [Row("Repeatability", f"{spread:.0f} counts across {len(plateaus)} presses",
                 "<10 counts", ">50", grade(spread, lambda v: v < 10, lambda v: v > 50))]
