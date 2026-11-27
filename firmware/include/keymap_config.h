@@ -214,6 +214,7 @@ enum keymap_pos {
  *   0x7xxx   KM_MACRO(id)      Predefined macro
  *   0x8000+  KM_UC(cp)         Unicode codepoint (cp < 0x8000)
  */
+#define KM_KIND_BASIC 0x0000
 #define KM_KIND_MO    0x1000
 #define KM_KIND_TG    0x2000
 #define KM_KIND_TH    0x3000

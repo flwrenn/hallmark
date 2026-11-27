@@ -218,6 +218,8 @@ void test_action_aliases_are_distinct(void)
 
 void test_action_kind_survives_encoding(void)
 {
+    TEST_ASSERT_EQUAL_HEX16(KM_KIND_BASIC, KM_KIND(KC_A));
+    TEST_ASSERT_EQUAL_HEX16(KM_KIND_BASIC, KM_KIND(KC_RGUI));
     TEST_ASSERT_EQUAL_HEX16(KM_KIND_HRM, KM_KIND(HM_A));
     TEST_ASSERT_EQUAL_HEX16(KM_KIND_HRM, KM_KIND(HM_O));
     TEST_ASSERT_EQUAL_HEX16(KM_KIND_TH, KM_KIND(MO_GNUM));
