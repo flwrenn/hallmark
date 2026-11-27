@@ -23,6 +23,7 @@
 | SOCD | Central | Last-input-wins opposing key resolution | `socd.c` |
 | Keymap config | Central | Layer arrays, HRM thresholds, hand sets, combos, SOCD pairs as `const` tables. Vocabulary (layers, positions, keycodes, action encoding) in `keymap_config.h`. | `keymap_config.c` |
 | Packet | All | Inter-half packet: 15 bytes (sync, half id, 6x16-bit positions, CRC-8/SMBUS). Pack, unpack, and a byte-stream parser that resyncs after garbage or a lost sync byte. The Transport module moves the bytes. | `packet.c` |
+| Calibration | Each half | Per-key rest baseline: averaged at boot, then tracked while the key is at rest and held while it is pressed. Turns a reading into depth above rest in ADC counts, so every key shares one set of rapid trigger thresholds. | `calibration.c` |
 
 ### Planned
 
@@ -31,5 +32,4 @@
 | HE Scan | Each half | SAADC + MUX scanning, calibration offsets |
 | Keymap | Central | Layers, combos, macros. Consumes the Keymap config tables. |
 | Transport | All | UART (Phase 1) or BLE (Phase 2) between halves |
-| Calibration | Each half | Boot auto-zero, runtime drift compensation |
 | Power Manager | Each half | Adaptive scan rate, deep sleep, battery monitoring |
