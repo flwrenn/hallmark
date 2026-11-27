@@ -32,6 +32,7 @@ set(ALGO_SOURCES
     ${FIRMWARE_SRC_DIR}/socd.c
     ${FIRMWARE_SRC_DIR}/keymap_config.c
     ${FIRMWARE_SRC_DIR}/packet.c
+    ${FIRMWARE_SRC_DIR}/calibration.c
 )
 
 if(ALGO_SOURCES)
@@ -54,3 +55,4 @@ add_subdirectory(home_row_mod)
 add_subdirectory(socd)
 add_subdirectory(keymap_config)
 add_subdirectory(packet)
+add_subdirectory(calibration)
