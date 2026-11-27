@@ -21,6 +21,7 @@
 | Rapid Trigger | Central | Per-key actuation via direction reversal FSM | `rapid_trigger.c` |
 | Home Row Mod | Central | Depth + time hybrid tap/hold decision | `home_row_mod.c` |
 | SOCD | Central | Last-input-wins opposing key resolution | `socd.c` |
+| Keymap | Central | Turns key positions going down and up into the HID keyboard usages and modifiers held now. Implemented: basic and modifier keycodes, `KM_S`, `KM_MO`, `KM_TG`, `KC_TRNS` fallthrough, and keys that release what they pressed across layer changes. Planned: combos, tap-hold (`KM_TH`, `KM_HRM`), one-shot modifiers, Caps Word, macros and consumer keys, Unicode, and SOCD wiring. Keys bound to those kinds hold nothing until then. | `keymap.c` |
 | Keymap config | Central | Layer arrays, HRM thresholds, hand sets, combos, SOCD pairs as `const` tables. Vocabulary (layers, positions, keycodes, action encoding) in `keymap_config.h`. | `keymap_config.c` |
 | Packet | All | Inter-half packet: 15 bytes (sync, half id, 6x16-bit positions, CRC-8/SMBUS). Pack, unpack, and a byte-stream parser that resyncs after garbage or a lost sync byte. The Transport module moves the bytes. | `packet.c` |
 
@@ -29,7 +30,6 @@
 | Module | Runs On | Purpose |
 |--------|---------|---------|
 | HE Scan | Each half | SAADC + MUX scanning, calibration offsets |
-| Keymap | Central | Layers, combos, macros. Consumes the Keymap config tables. |
 | Transport | All | UART (Phase 1) or BLE (Phase 2) between halves |
 | Calibration | Each half | Boot auto-zero, runtime drift compensation |
 | Power Manager | Each half | Adaptive scan rate, deep sleep, battery monitoring |
