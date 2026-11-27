@@ -11,4 +11,5 @@ target_sources(app PRIVATE
   src/socd.c
   src/keymap_config.c
   src/packet.c
+  src/calibration.c
 )
