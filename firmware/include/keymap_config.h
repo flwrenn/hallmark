@@ -7,8 +7,9 @@
  * This header holds the vocabulary: layers, positions, keycodes,
  * action encoding, and the table types.  The tables themselves are
  * defined in firmware/src/keymap_config.c and checked by
- * tests/keymap_config.  The Keymap module (not yet implemented) will
- * consume both.
+ * tests/keymap_config.  The Keymap module (keymap.h) resolves keys
+ * through the layer arrays; the other tables wait for its later
+ * slices.
  */
 
 #ifndef KEYMAP_CONFIG_H
