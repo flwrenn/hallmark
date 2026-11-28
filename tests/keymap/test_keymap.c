@@ -22,10 +22,13 @@
 
 #define NO_KEY 0x00
 
+/* The highest non-modifier usage, on the last bit of the last bitmap byte. */
+#define LAST_KEY (KC_LCTL - 1)
+
 /*
  *  base:  L01 a   L02 S(1)  L03 b  L04 c  L05 d
  *         L06-L09 LCtl LSft LAlt LGui   R06-R09 RCtl RSft RAlt RGui
- *         L11 e   L12 f   L13 g   L14 S(2)
+ *         L11 e   L12 f   L13 g   L14 S(2)   L15 LAST_KEY
  *         R01-R05 the kinds later slices own
  *         LT1 TG(NAV)  LT2 MO(SYM)  LT3 MO(SYM)
  *         RT1 Ent      RT2 Ent      RT3 MO(NAV)
@@ -47,9 +50,10 @@ static const uint16_t test_layers[KEYMAP_LAYERS][KEYMAP_KEYS] = {
                         [POS_R08] = KC_RALT,        [POS_R09] = KC_RGUI,
                         [POS_L11] = KC_E,           [POS_L12] = KC_F,
                         [POS_L13] = KC_G,           [POS_L14] = KM_S(KC_2),
-                        [POS_LT1] = KM_TG(L_NAV),   [POS_LT2] = KM_MO(L_SYM),
-                        [POS_LT3] = KM_MO(L_SYM),   [POS_RT1] = KC_ENT,
-                        [POS_RT2] = KC_ENT,         [POS_RT3] = KM_MO(L_NAV),
+                        [POS_L15] = LAST_KEY,       [POS_LT1] = KM_TG(L_NAV),
+                        [POS_LT2] = KM_MO(L_SYM),   [POS_LT3] = KM_MO(L_SYM),
+                        [POS_RT1] = KC_ENT,         [POS_RT2] = KC_ENT,
+                        [POS_RT3] = KM_MO(L_NAV),
                 },
         [L_SYM] =
                 {
@@ -195,6 +199,19 @@ void test_shift_stays_held_until_its_last_holder_releases(void)
     assert_nothing_held();
 }
 
+void test_last_usage_sets_the_last_bitmap_bit(void)
+{
+    struct keymap_held held;
+
+    TEST_ASSERT_EQUAL_UINT(28, sizeof(held.keys));
+    keymap_press(&km, POS_L15);
+    held = keymap_get_held(&km);
+    TEST_ASSERT_EQUAL_HEX8(0x80, held.keys[27]);
+    TEST_ASSERT_EQUAL_HEX8(0, held.mods);
+    keymap_release(&km, POS_L15);
+    assert_nothing_held();
+}
+
 void test_seven_keys_are_held_together(void)
 {
     static const enum keymap_pos chord[] = {POS_L01, POS_L03, POS_L04, POS_L05,
@@ -230,15 +247,17 @@ void test_kind_owned_by_a_later_slice_is_not_transparent(void)
     assert_press_holds(POS_L11, 0, KC_E);
 }
 
+/* NAV is toggled on first, so a POS_NONE edge that disturbed the layers would show. */
 void test_pos_none_is_ignored(void)
 {
+    tap(POS_LT1);
     keymap_press(&km, POS_NONE);
     assert_nothing_held();
     keymap_press(&km, POS_L01);
     keymap_release(&km, POS_NONE);
-    assert_held(0, KC_A);
+    assert_held(0, KC_LEFT);
     keymap_release(&km, POS_L01);
-    assert_press_holds(POS_L01, 0, KC_A);
+    assert_press_holds(POS_L01, 0, KC_LEFT);
 }
 
 /* --------------------------------------------------------------------- */
@@ -341,6 +360,7 @@ int main(void)
     RUN_TEST(test_shifted_key_holds_shift_with_its_key);
     RUN_TEST(test_usage_stays_held_until_its_last_holder_releases);
     RUN_TEST(test_shift_stays_held_until_its_last_holder_releases);
+    RUN_TEST(test_last_usage_sets_the_last_bitmap_bit);
     RUN_TEST(test_seven_keys_are_held_together);
     RUN_TEST(test_kinds_owned_by_later_slices_hold_nothing);
     RUN_TEST(test_kind_owned_by_a_later_slice_is_not_transparent);
