@@ -325,7 +325,8 @@ enum keymap_pos {
 /*
  * Home row mod thresholds for one position.  Field names mirror
  * struct hrm_config (home_row_mod.h); the Keymap module copies them
- * into one at runtime and fills rest_adc from calibration.
+ * into one at runtime with rest_adc = 0, because calibration.h already
+ * reports depth above rest.
  */
 struct keymap_hrm {
     enum keymap_pos position;
