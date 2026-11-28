@@ -26,7 +26,11 @@
  *
  * The opposite case has no fast path.  A rest level that jumps up by
  * rest_band or more looks like a press, so the baseline holds until the
- * reading comes back inside the band.
+ * reading comes back inside the band.  A short downward glitch ends the
+ * same way: once the fast path has pulled the baseline down by rest_band
+ * or more, the true rest level reads as a press.  At a fast_shift of 4,
+ * a dip of 100 counts does that in 3 samples.  cal_init() re-zeroes the
+ * key.
  *
  * Time constants are in samples: a shift of n follows a step with a time
  * constant of 2^n calls to cal_update().
@@ -73,7 +77,7 @@ enum cal_phase {
  *                pushes rest_band below the baseline takes a fast step.
  *                Keep it at or below rt_config.release_adc: the baseline
  *                absorbs a press held inside the band, so its depth
- *                decays to 0.
+ *                decays to 0, or to the stall limit below.
  *                0 leaves no rest regime, so the baseline never rises.
  * @slow_shift    Baseline step inside the band: error >> slow_shift.
  * @fast_shift    Baseline step below the band: error >> fast_shift.
