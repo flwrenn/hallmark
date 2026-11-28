@@ -89,6 +89,10 @@ void keymap_init(struct keymap_state *km, const uint16_t (*layers)[KEYMAP_KEYS])
  * highest active layer whose entry is not KC_TRNS wins, and L_BASE is
  * always active.  A KM_TG action flips its layer here.  POS_NONE is
  * ignored.
+ *
+ * Release a position before pressing it again.  A second press with no
+ * release resolves the position again, and a KM_TG flips twice.  Rapid
+ * trigger alternates the two.
  */
 void keymap_press(struct keymap_state *km, enum keymap_pos pos);
 
